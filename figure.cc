@@ -49,8 +49,18 @@ int main(int argc, char** argv)
 
     // Build initial environment.
     Env init_env;
+    Exp exp_true;
+    exp_true.type = Type::BOOLEAN;
+    exp_true.data = new bool(true);
+    init_env.let("true", exp_true);
+    Exp exp_false;
+    exp_false.type = Type::BOOLEAN;
+    exp_false.data = new bool(false);
+    init_env.let("false", exp_false);
+    init_env.builtin("if", builtin_if);
     init_env.builtin("let", builtin_let);
     init_env.builtin("print", builtin_print);
+    init_env.builtin("+", builtin_add);
 
     // Evaluate expression and print result.
     Exp* result = exp.eval(init_env);

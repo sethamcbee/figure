@@ -305,50 +305,39 @@ Exp* Exp::eval(Env& env)
         return this;
     }
 
-    // Evaluate symbols and lists.
+    // Evaluate symbols, functions, and lists.
     if (type == Type::SYMBOL)
     {
         std::string* sym = (std::string*)data;
         const Exp* ret = &env.get(*sym);
         return (Exp*)ret;
     }
+    if (type == Type::NATIVE_FUNCTION)
+    {
+        return this;
+    }
     else if (type == Type::LIST)
     {
-        // Check for supported applications.
         Exp* first = (Exp*)data;
-        const std::string& op = first->get_string();
 
-        // Check for built-in function.
-        Native_Function& fn = env.get(op).get_native_function();
-        std::vector<Exp*> args;
-        Exp* next_arg = first->link;
-        while (next_arg)
+        // Check if this is a function application.
+        Exp* op = first->eval(env);
+        if (op->type == Type::NATIVE_FUNCTION)
         {
-            args.push_back(next_arg);
-            next_arg = next_arg->link;
+            // Check for built-in function.
+            Native_Function& fn = op->get_native_function();
+            std::vector<Exp*> args;
+            Exp* next_arg = first->link;
+            while (next_arg)
+            {
+                args.push_back(next_arg);
+                next_arg = next_arg->link;
+            }
+            return fn(env, args);
         }
-        return fn(env, args);
 
-        if (op == "+")
-        {
-            // Get two args.
-            Exp* exp0 = first->link;
-            Exp* exp1 = exp0->link;
-            Number_Type arg0 = exp0->eval(env)->get_number();
-            Number_Type arg1 = exp1->eval(env)->get_number();
-
-            Exp* ret = new Exp;
-            ret->type = Type::NUMBER;
-            ret->data = new Number_Type;
-            Number_Type* p = (Number_Type*)ret->data;
-            *p = arg0 + arg1;
-
-            return ret;
-        }
-        else
-        {
-            return new Exp;
-        }
+        // Else, evaluate and return the first argument.
+        return op;
     }
     else
     {

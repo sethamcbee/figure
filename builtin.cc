@@ -23,6 +23,21 @@ Exp* builtin_let(Env& env, std::vector<Exp*>& args)
     return args[2]->eval(*new_env);
 }
 
+Exp* builtin_if(Env& env, std::vector<Exp*>& args)
+{
+    // Evaluate condition.
+    bool b = args[0]->eval(env)->get_bool();
+
+    if (b)
+    {
+        return args[1]->eval(env);
+    }
+    else
+    {
+        return args[2]->eval(env);
+    }
+}
+
 Exp* builtin_print(Env& env, std::vector<Exp*>& args)
 {
     Exp* val = args[0]->eval(env);
@@ -41,4 +56,18 @@ Exp* builtin_print(Env& env, std::vector<Exp*>& args)
 
     // Return evaluated expression.
     return val;
+}
+
+Exp* builtin_add(Env& env, std::vector<Exp*>& args)
+{
+    Number_Type n0 = args[0]->eval(env)->get_number();
+    Number_Type n1 = args[1]->eval(env)->get_number();
+
+    Exp* ret = new Exp;
+    ret->type = Type::NUMBER;
+    ret->data = new Number_Type;
+    Number_Type* p = (Number_Type*)ret->data;
+    *p = n0 + n1;
+
+    return ret;
 }

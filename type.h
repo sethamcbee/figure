@@ -6,6 +6,7 @@
 #define TYPE_H
 
 #include <functional>
+#include <string>
 #include <vector>
 
 class Env;

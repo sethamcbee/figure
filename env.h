@@ -7,12 +7,14 @@
 #ifndef ENV_H
 #define ENV_H
 
+#include <functional>
 #include <map>
 #include <memory>
 #include <string>
 
-#include "exp.h"
 #include "type.h"
+
+class Exp;
 
 class Env
 {

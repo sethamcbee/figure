@@ -57,6 +57,7 @@ int main(int argc, char** argv)
     exp_false.type = Type::BOOLEAN;
     exp_false.data = new bool(false);
     init_env.let("false", exp_false);
+    init_env.builtin("lambda", builtin_lambda);
     init_env.builtin("if", builtin_if);
     init_env.builtin("let", builtin_let);
     init_env.builtin("print", builtin_print);

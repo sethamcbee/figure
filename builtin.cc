@@ -10,6 +10,38 @@
 #include "builtin.h"
 #include "env.h"
 #include "exp.h"
+#include "lambda.h"
+
+Exp* builtin_lambda(Env& env, std::vector<Exp*>& args)
+{
+    Lambda* lam = new Lambda;
+    lam->env = env;
+
+    // Get parameters.
+    if (args[0]->type == Type::LIST)
+    {
+        Exp* it = (Exp*)args[0]->data;
+        while (it)
+        {
+            lam->args.push_back(it->get_string());
+            it = it->link;
+        }
+    }
+
+    // Get bodies.
+    size_t count = args.size();
+    for (size_t i = 1; i < count; ++i)
+    {
+        lam->bodies.push_back(args[i]);
+    }
+
+    // Build expression.
+    Exp* exp = new Exp;
+    exp->type = Type::LAMBDA;
+    exp->data = lam;
+
+    return exp;
+}
 
 Exp* builtin_let(Env& env, std::vector<Exp*>& args)
 {

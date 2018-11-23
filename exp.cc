@@ -8,6 +8,7 @@
 
 #include "env.h"
 #include "exp.h"
+#include "lambda.h"
 
 size_t next_token(const std::string& str, size_t start, size_t end)
 {
@@ -274,6 +275,11 @@ Exp::~Exp()
         Native_Function* p = (Native_Function*)data;
         delete p;
     }
+    else if (type == Type::LAMBDA)
+    {
+        Lambda* p = (Lambda*)data;
+        // Deletion happens in the expression itself.
+    }
     else if (type == Type::VOID)
     {
         // Do nothing.
@@ -316,6 +322,10 @@ Exp* Exp::eval(Env& env)
     {
         return this;
     }
+    else if (type == Type::LAMBDA)
+    {
+        return this;
+    }
     else if (type == Type::LIST)
     {
         Exp* first = (Exp*)data;
@@ -341,9 +351,37 @@ Exp* Exp::eval(Env& env)
             }
             return fn(env, args);
         }
+        else if (op->type == Type::LAMBDA)
+        {
+            // Substitute arguments.
+            Lambda* lam = (Lambda*)op->data;
+            Env new_env = lam->env;
+            size_t arg_count = lam->args.size();
+            Exp* next_arg = first->link;
+            for (size_t i = 0; i < arg_count; ++i)
+            {
+                new_env.let(lam->args[i], *next_arg->eval(env));
+                next_arg = next_arg->link;
+            }
 
-        // Else, evaluate and return the first argument.
-        return op;
+            // Iterate over bodies.
+            Exp* ret;
+            size_t body_count = lam->bodies.size();
+            for (size_t i = 0; i < body_count; ++i)
+            {
+                ret = lam->bodies[i]->eval(new_env);
+            }
+            return ret;
+        }
+
+        // Check if this list has just one element.
+        if (first->link == nullptr)
+        {
+            return op;
+        }
+
+        // Else, return the full list.
+        return this;
     }
     else
     {

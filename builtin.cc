@@ -81,3 +81,45 @@ Exp* builtin_add(Env& env, std::vector<Exp*>& args)
 
     return ret;
 }
+
+Exp* builtin_sub(Env& env, std::vector<Exp*>& args)
+{
+    Number_Type n0 = args[0]->eval(env)->get_number();
+    Number_Type n1 = args[1]->eval(env)->get_number();
+
+    Exp* ret = new Exp;
+    ret->type = Type::NUMBER;
+    ret->data = new Number_Type;
+    Number_Type* p = (Number_Type*)ret->data;
+    *p = n0 - n1;
+
+    return ret;
+}
+
+Exp* builtin_mul(Env& env, std::vector<Exp*>& args)
+{
+    Number_Type n0 = args[0]->eval(env)->get_number();
+    Number_Type n1 = args[1]->eval(env)->get_number();
+
+    Exp* ret = new Exp;
+    ret->type = Type::NUMBER;
+    ret->data = new Number_Type;
+    Number_Type* p = (Number_Type*)ret->data;
+    *p = n0 * n1;
+
+    return ret;
+}
+
+Exp* builtin_div(Env& env, std::vector<Exp*>& args)
+{
+    Number_Type n0 = args[0]->eval(env)->get_number();
+    Number_Type n1 = args[1]->eval(env)->get_number();
+
+    Exp* ret = new Exp;
+    ret->type = Type::NUMBER;
+    ret->data = new Number_Type;
+    Number_Type* p = (Number_Type*)ret->data;
+    *p = n0 / n1;
+
+    return ret;
+}

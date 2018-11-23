@@ -61,6 +61,9 @@ int main(int argc, char** argv)
     init_env.builtin("let", builtin_let);
     init_env.builtin("print", builtin_print);
     init_env.builtin("+", builtin_add);
+    init_env.builtin("-", builtin_sub);
+    init_env.builtin("*", builtin_mul);
+    init_env.builtin("/", builtin_div);
 
     // Evaluate expression and print result.
     Exp* result = exp.eval(init_env);

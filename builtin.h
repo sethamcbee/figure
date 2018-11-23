@@ -15,5 +15,8 @@ Exp* builtin_let(Env& env, std::vector<Exp*>& args);
 Exp* builtin_if(Env& env, std::vector<Exp*>& args);
 Exp* builtin_print(Env& env, std::vector<Exp*>& args);
 Exp* builtin_add(Env& env, std::vector<Exp*>& args);
+Exp* builtin_sub(Env& env, std::vector<Exp*>& args);
+Exp* builtin_mul(Env& env, std::vector<Exp*>& args);
+Exp* builtin_div(Env& env, std::vector<Exp*>& args);
 
 #endif // BUILTIN_H

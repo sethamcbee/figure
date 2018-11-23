@@ -360,18 +360,25 @@ Exp* Exp::eval(Env& env)
             Exp* next_arg = first->link;
             for (size_t i = 0; i < arg_count; ++i)
             {
-                new_env.let(lam->args[i], *next_arg->eval(env));
+                new_env.let(lam->args[i], next_arg->eval(env));
                 next_arg = next_arg->link;
             }
 
             // Iterate over bodies.
-            Exp* ret;
+            Exp* ret = nullptr;
             size_t body_count = lam->bodies.size();
             for (size_t i = 0; i < body_count; ++i)
             {
                 ret = lam->bodies[i]->eval(new_env);
             }
-            return ret;
+            if (ret)
+            {
+                return ret;
+            }
+            else
+            {
+                return new Exp;
+            }
         }
 
         // Check if this list has just one element.

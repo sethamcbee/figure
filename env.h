@@ -24,7 +24,7 @@ public:
     const Exp& get(const std::string& name);
 
     /// Bind a symbol to a value in the current scope.
-    void let(const std::string& name, const Exp& val);
+    void let(const std::string& name, Exp* val);
 
     /// Bind a new native function.
     void builtin(const std::string& name, const Native_Function& fn);
@@ -35,7 +35,7 @@ public:
 private:
 
     /// Map of symbols at the current scope.
-    std::map<std::string, Exp> symbols;
+    std::map<std::string, Exp*> symbols;
 
     /// Pointer to parent scope's environment. Allows efficient
     /// creation and deletion of new scopes, as well as the

@@ -38,6 +38,7 @@ int main(int argc, char** argv)
     // Read input file.
     std::stringstream input_buffer;
     input_buffer << input_file.rdbuf();
+    input_file.close();
     std::string input = input_buffer.str();
 
     // Parse input.
@@ -52,11 +53,11 @@ int main(int argc, char** argv)
     Exp exp_true;
     exp_true.type = Type::BOOLEAN;
     exp_true.data = new bool(true);
-    init_env.let("true", exp_true);
+    init_env.let("true", &exp_true);
     Exp exp_false;
     exp_false.type = Type::BOOLEAN;
     exp_false.data = new bool(false);
-    init_env.let("false", exp_false);
+    init_env.let("false", &exp_false);
     init_env.builtin("lambda", builtin_lambda);
     init_env.builtin("if", builtin_if);
     init_env.builtin("let", builtin_let);

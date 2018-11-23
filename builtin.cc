@@ -45,14 +45,29 @@ Exp* builtin_lambda(Env& env, std::vector<Exp*>& args)
 
 Exp* builtin_let(Env& env, std::vector<Exp*>& args)
 {
-    // Get args.
-    std::string id = args[0]->get_string();
-    Exp* val = args[1]->eval(env);
-
-    // Build new environment and execute.
+    // Build new environment.
     auto new_env = env.spawn();
-    new_env->let(id, *val);
-    return args[2]->eval(*new_env);
+    if (args[0]->type == Type::LIST)
+    {
+        Exp* ind = (Exp*)args[0]->data;
+        while (ind)
+        {
+            Exp* var = (Exp*)ind->data;
+            new_env->let(var->get_string(), var->link->eval(env));
+            ind = ind->link;
+        }
+        return args[1]->eval(*new_env);
+    }
+    else if (args[0]->type == Type::SYMBOL)
+    {
+        new_env->let(args[0]->get_string(), args[1]->eval(env));
+        return args[2]->eval(*new_env);
+    }
+    else
+    {
+        std::cerr << "Poorly formed let expression.\n";
+        std::exit(1);
+    }
 }
 
 Exp* builtin_if(Env& env, std::vector<Exp*>& args)

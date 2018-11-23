@@ -285,7 +285,7 @@ Exp::~Exp()
     else if (type == Type::LAMBDA)
     {
         Lambda* p = (Lambda*)data;
-        // Deletion happens in the expression itself.
+        delete p;
     }
     else if (type == Type::VOID)
     {
@@ -303,19 +303,19 @@ std::shared_ptr<Exp> Exp::eval(Env& env)
     // Return atoms as-is.
     if (type == Type::STRING)
     {
-        return std::shared_ptr<Exp>(this);
+        return shared_from_this();
     }
     else if (type == Type::BOOLEAN)
     {
-        return std::shared_ptr<Exp>(this);
+        return shared_from_this();
     }
     else if (type == Type::NUMBER)
     {
-        return std::shared_ptr<Exp>(this);
+        return shared_from_this();
     }
     else if (type == Type::VOID)
     {
-        return std::shared_ptr<Exp>(this);
+        return shared_from_this();
     }
 
     // Evaluate symbols, functions, and lists.
@@ -383,18 +383,19 @@ std::shared_ptr<Exp> Exp::eval(Env& env)
             }
             else
             {
-                return std::shared_ptr<Exp>(new Exp);
+                return Exp::spawn();
             }
         }
 
         // Check if this list has just one element.
         if (first->link == nullptr)
         {
+            // Return evaluation of this element.
             return op;
         }
 
         // Else, return the full list.
-        return std::shared_ptr<Exp>(this);
+        return shared_from_this();
     }
     else
     {
@@ -502,6 +503,19 @@ Native_Function& Exp::get_native_function() const
     else
     {
         std::cerr << "Error: Invalid attempt to treat object as a native function.\n";
+        std::exit(1);
+    }
+}
+
+std::shared_ptr<Exp> Exp::get_list() const
+{
+    if (type == Type::LIST)
+    {
+        return *(std::shared_ptr<Exp>*)data;
+    }
+    else
+    {
+        std::cerr << "Error: Invalid ttempt to treat object as list.\n";
         std::exit(1);
     }
 }

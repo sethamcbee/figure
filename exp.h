@@ -56,6 +56,9 @@ public:
     /// Get a native function from this expression.
     Native_Function& get_native_function() const;
 
+    /// Get the first element of a list.
+    std::shared_ptr<Exp> get_list() const;
+
     Type type = Type::VOID;
 
     /// Pointer to the next list entry.

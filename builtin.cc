@@ -20,7 +20,7 @@ std::shared_ptr<Exp> builtin_lambda(Env& env, std::vector<std::shared_ptr<Exp>>&
     // Get parameters.
     if (args[0]->type == Type::LIST)
     {
-        auto it = *(std::shared_ptr<Exp>*)(args[0]->data);
+        auto it = args[0]->get_list();
         while (it)
         {
             lam->args.push_back(it->get_string());

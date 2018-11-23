@@ -5,6 +5,12 @@
 #ifndef TYPE_H
 #define TYPE_H
 
+#include <functional>
+#include <vector>
+
+class Env;
+class Exp;
+
 /// Defines a fundamental data type identifier.
 enum class Type
 {
@@ -19,5 +25,6 @@ enum class Type
 };
 
 typedef double Number_Type;
+typedef std::function<Exp*(Env& env, std::vector<Exp*>&)> Native_Function;
 
 #endif // TYPE_H

@@ -269,6 +269,11 @@ Exp::~Exp()
         Exp* p = (Exp*)data;
         delete p;
     }
+    else if (type == Type::NATIVE_FUNCTION)
+    {
+        Native_Function* p = (Native_Function*)data;
+        delete p;
+    }
     else if (type == Type::VOID)
     {
         // Do nothing.
@@ -312,6 +317,18 @@ Exp* Exp::eval(Env& env)
         // Check for supported applications.
         Exp* first = (Exp*)data;
         const std::string& op = first->get_string();
+
+        // Check for built-in function.
+        Native_Function& fn = env.get(op).get_native_function();
+        std::vector<Exp*> args;
+        Exp* next_arg = first->link;
+        while (next_arg)
+        {
+            args.push_back(next_arg);
+            next_arg = next_arg->link;
+        }
+        return fn(env, args);
+
         if (op == "+")
         {
             // Get two args.
@@ -327,40 +344,6 @@ Exp* Exp::eval(Env& env)
             *p = arg0 + arg1;
 
             return ret;
-        }
-        else if (op == "print")
-        {
-            // Get arg.
-            Exp* exp0 = first->link->eval(env);
-            if (exp0->type == Type::NUMBER)
-            {
-                std::cout << exp0->get_number() << "\n";
-            }
-            else if (exp0->type == Type::BOOLEAN)
-            {
-                std::cout << exp0->get_bool() << "\n";
-            }
-            else if (exp0->type == Type::STRING)
-            {
-                std::cout << exp0->get_string() << "\n";
-            }
-
-            // Return void.
-            return new Exp;
-        }
-        else if (op == "let")
-        {
-            // Get args.
-            Exp* exp0 = first->link;
-            Exp* exp1 = exp0->link;
-            Exp* exp2 = exp1->link;
-            std::string id = exp0->get_string();
-            Exp* val = exp1->eval(env);
-
-            // Build new environment and execute.
-            auto new_env = env.spawn();
-            new_env->let(id, *val);
-            return exp2->eval(*new_env);
         }
         else
         {
@@ -459,6 +442,20 @@ bool Exp::get_bool() const
     else
     {
         std::cerr << "Error: Attempt to treat non-boolean type as boolean.\n";
+        std::exit(1);
+    }
+}
+
+Native_Function& Exp::get_native_function() const
+{
+    if (type == Type::NATIVE_FUNCTION)
+    {
+        Native_Function* p = (Native_Function*)data;
+        return *p;
+    }
+    else
+    {
+        std::cerr << "Error: Invalid attempt to treat object as a native function.\n";
         std::exit(1);
     }
 }

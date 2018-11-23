@@ -52,6 +52,9 @@ public:
     /// Get a boolean from this expression.
     bool get_bool() const;
 
+    /// Get a native function from this expression.
+    Native_Function& get_native_function() const;
+
     Type type = Type::VOID;
 
     /// Pointer to the next list entry.

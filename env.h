@@ -12,6 +12,7 @@
 #include <string>
 
 #include "exp.h"
+#include "type.h"
 
 class Env
 {
@@ -22,6 +23,9 @@ public:
 
     /// Bind a symbol to a value in the current scope.
     void let(const std::string& name, const Exp& val);
+
+    /// Bind a new native function.
+    void builtin(const std::string& name, const Native_Function& fn);
 
     /// Spawn a new environment, with this as the parent environment.
     std::unique_ptr<Env> spawn();

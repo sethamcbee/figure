@@ -31,6 +31,15 @@ void Env::let(const std::string& name, const Exp& val)
     symbols[name] = val;
 }
 
+void Env::builtin(const std::string& name, const Native_Function& fn)
+{
+    Native_Function* p = new Native_Function(fn);
+    Exp* exp = new Exp;
+    exp->type = Type::NATIVE_FUNCTION;
+    exp->data = (void*)p;
+    let(name, *exp);
+}
+
 std::unique_ptr<Env> Env::spawn()
 {
     std::unique_ptr<Env> new_env(new Env);

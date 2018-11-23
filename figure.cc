@@ -9,6 +9,7 @@
 #include <sstream>
 #include <string>
 
+#include "builtin.h"
 #include "env.h"
 #include "exp.h"
 #include "type.h"
@@ -48,6 +49,8 @@ int main(int argc, char** argv)
 
     // Build initial environment.
     Env init_env;
+    init_env.builtin("let", builtin_let);
+    init_env.builtin("print", builtin_print);
 
     // Evaluate expression and print result.
     Exp* result = exp.eval(init_env);

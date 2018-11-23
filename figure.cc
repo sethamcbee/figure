@@ -45,7 +45,7 @@ int main(int argc, char** argv)
 
     // Print expression.
     exp.print();
-    std::cout << std::endl;
+    std::cout << "\n\n";
 
     // Build initial environment.
     Env init_env;

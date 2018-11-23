@@ -26,7 +26,17 @@ Exp* builtin_let(Env& env, std::vector<Exp*>& args)
 Exp* builtin_if(Env& env, std::vector<Exp*>& args)
 {
     // Evaluate condition.
-    bool b = args[0]->eval(env)->get_bool();
+    bool b;
+
+    Exp* cond = args[0]->eval(env);
+    if (cond->type == Type::BOOLEAN)
+    {
+        b = cond->get_bool();
+    }
+    else
+    {
+        b = true;
+    }
 
     if (b)
     {

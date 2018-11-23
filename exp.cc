@@ -320,6 +320,12 @@ Exp* Exp::eval(Env& env)
     {
         Exp* first = (Exp*)data;
 
+        // Check if this is an empty list.
+        if (first == nullptr)
+        {
+            return this;
+        }
+
         // Check if this is a function application.
         Exp* op = first->eval(env);
         if (op->type == Type::NATIVE_FUNCTION)

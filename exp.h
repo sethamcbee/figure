@@ -9,6 +9,8 @@
 
 #include "type.h"
 
+class Env;
+
 /// Find the start of the next symbol, string, or list.
 size_t next_token(const std::string& str, size_t start, size_t end);
 
@@ -28,13 +30,27 @@ class Exp
 {
 public:
 
+    Exp();
+
     /// Parse a string to build an s-expression.
     Exp(const std::string& str, size_t start, size_t end);
 
     ~Exp();
 
+    /// Evaluate an expression.
+    Exp* eval(Env& env);
+
     /// Print the contents of an expression.
     void print() const;
+
+    /// Get a string from this expression.
+    const std::string& get_string() const;
+
+    /// Get a number from this expression.
+    Number_Type get_number() const;
+
+    /// Get a boolean from this expression.
+    bool get_bool() const;
 
     Type type = Type::VOID;
 

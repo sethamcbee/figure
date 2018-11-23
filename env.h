@@ -11,17 +11,17 @@
 #include <memory>
 #include <string>
 
-class Exp;
+#include "exp.h"
 
 class Env
 {
 public:
 
     /// Get the value of a bound symbol.
-    const Exp& get(const std::string& name) const;
+    const Exp& get(const std::string& name);
 
     /// Bind a symbol to a value in the current scope.
-    void set(const std::string& name, const Exp& val);
+    void let(const std::string& name, const Exp& val);
 
     /// Spawn a new environment, with this as the parent environment.
     std::unique_ptr<Env> spawn() const;
@@ -29,7 +29,7 @@ public:
 private:
 
     /// Map of symbols at the current scope.
-    std::map<std::string, std::unique_ptr<Exp>> symbols;
+    std::map<std::string, Exp> symbols;
 
     /// Pointer to parent scope's environment. Allows efficient
     /// creation and deletion of new scopes, as well as the

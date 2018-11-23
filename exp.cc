@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <iostream>
 
+#include "env.h"
 #include "exp.h"
 
 size_t next_token(const std::string& str, size_t start, size_t end)
@@ -117,6 +118,13 @@ size_t skip_list(const std::string& str, size_t start, size_t end)
     std::exit(1);
 }
 
+Exp::Exp()
+{
+    type = Type::VOID;
+    data = nullptr;
+    link = nullptr;
+}
+
 Exp::Exp(const std::string& str, size_t start, size_t end)
 {
     // Find next token.
@@ -143,6 +151,7 @@ Exp::Exp(const std::string& str, size_t start, size_t end)
         type = Type::STRING;
         std::string* p = new std::string;
         *p = str.substr(tok_start + 1, tok_end - tok_start);
+
         data = p;
     }
     // Check if this is a list.
@@ -209,10 +218,26 @@ Exp::Exp(const std::string& str, size_t start, size_t end)
         }
 
         // Copy data.
-        type = Type::SYMBOL;
         std::string* p = new std::string;
         *p = str.substr(tok_start, tok_end - tok_start);
-        data = p;
+        type = Type::SYMBOL;
+
+        // Check if this symbol forms a numeric literal.
+        char* num_end;
+        double num = std::strtod(p->c_str(), &num_end);
+        if (num_end == p->c_str() + p->length())
+        {
+            delete p;
+
+            type = Type::NUMBER;
+            Number_Type* d = new Number_Type;
+            *d = num;
+            data = d;
+        }
+        else
+        {
+            data = p;
+        }
     }
 }
 
@@ -255,6 +280,86 @@ Exp::~Exp()
     }
 }
 
+Exp* Exp::eval(Env& env)
+{
+    // Return atoms as-is.
+    if (type == Type::STRING)
+    {
+        return this;
+    }
+    else if (type == Type::BOOLEAN)
+    {
+        return this;
+    }
+    else if (type == Type::NUMBER)
+    {
+        return this;
+    }
+    else if (type == Type::VOID)
+    {
+        return this;
+    }
+
+    // Evaluate symbols and lists.
+    if (type == Type::SYMBOL)
+    {
+        std::string* sym = (std::string*)data;
+        const Exp* ret = &env.get(*sym);
+        return (Exp*)ret;
+    }
+    else if (type == Type::LIST)
+    {
+        // Check for supported applications.
+        Exp* first = (Exp*)data;
+        const std::string& op = first->get_string();
+        if (op == "+")
+        {
+            // Get two args.
+            Exp* exp0 = first->link;
+            Exp* exp1 = exp0->link;
+            Number_Type arg0 = exp0->eval(env)->get_number();
+            Number_Type arg1 = exp1->eval(env)->get_number();
+
+            Exp* ret = new Exp;
+            ret->type = Type::NUMBER;
+            ret->data = new Number_Type;
+            Number_Type* p = (Number_Type*)ret->data;
+            *p = arg0 + arg1;
+
+            return ret;
+        }
+        else if (op == "print")
+        {
+            // Get arg.
+            Exp* exp0 = first->link->eval(env);
+            if (exp0->type == Type::NUMBER)
+            {
+                std::cout << exp0->get_number();
+            }
+            else if (exp0->type == Type::BOOLEAN)
+            {
+                std::cout << exp0->get_bool();
+            }
+            else if (exp0->type == Type::STRING)
+            {
+                std::cout << exp0->get_string();
+            }
+
+            // Return void.
+            return new Exp;
+        }
+        else
+        {
+            return new Exp;
+        }
+    }
+    else
+    {
+        std::cerr << "Unsupported evaluation.\n";
+        std::exit(1);
+    }
+}
+
 void Exp::print() const
 {
     // Print by type.
@@ -262,6 +367,16 @@ void Exp::print() const
     {
         std::string* p = (std::string*)data;
         std::cout << '"' << *p << '"';
+    }
+    else if (type == Type::NUMBER)
+    {
+        Number_Type* p = (Number_Type*)data;
+        std::cout << *p;
+    }
+    else if (type == Type::BOOLEAN)
+    {
+        bool* p = (bool*)data;
+        std::cout << *p;
     }
     else if (type == Type::SYMBOL)
     {
@@ -289,5 +404,47 @@ void Exp::print() const
         }
 
         std::cout << ')';
+    }
+}
+
+const std::string& Exp::get_string() const
+{
+    if (type == Type::STRING || type == Type::SYMBOL)
+    {
+        const std::string* p = (const std::string*)data;
+        return *p;
+    }
+    else
+    {
+        std::cerr << "Error: Attempt to treat non-string type as string.\n";
+        std::exit(1);
+    }
+}
+
+Number_Type Exp::get_number() const
+{
+    if (type == Type::NUMBER)
+    {
+        const Number_Type* p = (const Number_Type*)data;
+        return *p;
+    }
+    else
+    {
+        std::cerr << "Error: Attempt to treat non-number type as number.\n";
+        std::exit(1);
+    }
+}
+
+bool Exp::get_bool() const
+{
+    if (type == Type::BOOLEAN)
+    {
+        const bool* p = (const bool*)data;
+        return *p;
+    }
+    else
+    {
+        std::cerr << "Error: Attempt to treat non-boolean type as boolean.\n";
+        std::exit(1);
     }
 }

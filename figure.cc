@@ -46,5 +46,13 @@ int main(int argc, char** argv)
     exp.print();
     std::cout << std::endl;
 
+    // Build initial environment.
+    Env init_env;
+
+    // Evaluate expression and print result.
+    Exp* result = exp.eval(init_env);
+    result->print();
+    std::cout << std::endl;
+
     return 0;
 }

@@ -16,9 +16,18 @@ size_t next_token(const std::string& str, size_t start, size_t end)
     for (auto i = start; i < end; ++i)
     {
         // Break at first non-whitespace character.
-        if (!isspace(str[i]) && str[i] != ')')
+        if (!isspace(str[i]) && str[i] != ')' && str[i] != ';')
         {
             return i;
+        }
+
+        // Skip over comments.
+        if (str[i] == ';')
+        {
+            while (i < end && str[i] != '\n')
+            {
+                ++i;
+            }
         }
     }
 

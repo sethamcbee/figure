@@ -36,7 +36,7 @@ std::shared_ptr<Exp> Figure::eval(const std::string& prog)
 
     // Parse input.
     std::shared_ptr<Exp> root = Exp::spawn();
-    root->parse(prog, 0, prog.length());
+    root->parse("(" + prog + ")", 0, prog.length() + 2);
 
     // Evaluate program.
     std::shared_ptr<Exp> result = root->eval(*init_env);

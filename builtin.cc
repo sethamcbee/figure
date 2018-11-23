@@ -42,6 +42,16 @@ std::shared_ptr<Exp> builtin_lambda(Env& env, std::vector<std::shared_ptr<Exp>>&
             it = it->link;
         }
     }
+    else if (args[0]->type == Type::SYMBOL)
+    {
+        // Get single parameter.
+        lam->args.push_back(args[0]->get_string());
+    }
+    else
+    {
+        std::cerr << "Error: Incorrectly constructed lambda.\n";
+        std::exit(1);
+    }
 
     // Get bodies.
     size_t count = args.size();

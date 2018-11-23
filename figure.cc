@@ -28,7 +28,7 @@ std::shared_ptr<Exp> Figure::eval(const std::string& prog)
     init_env->builtin("lambda", builtin_lambda);
     init_env->builtin("if", builtin_if);
     init_env->builtin("let", builtin_let);
-    init_env->builtin("print", builtin_print);
+    init_env->builtin("display", builtin_display);
     init_env->builtin("+", builtin_add);
     init_env->builtin("-", builtin_sub);
     init_env->builtin("*", builtin_mul);

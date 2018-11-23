@@ -17,7 +17,7 @@ class Env;
 std::shared_ptr<Exp> builtin_lambda(Env& env, std::vector<std::shared_ptr<Exp>>& args);
 std::shared_ptr<Exp> builtin_let(Env& env, std::vector<std::shared_ptr<Exp>>& args);
 std::shared_ptr<Exp> builtin_if(Env& env, std::vector<std::shared_ptr<Exp>>& args);
-std::shared_ptr<Exp> builtin_print(Env& env, std::vector<std::shared_ptr<Exp>>& args);
+std::shared_ptr<Exp> builtin_display(Env& env, std::vector<std::shared_ptr<Exp>>& args);
 std::shared_ptr<Exp> builtin_add(Env& env, std::vector<std::shared_ptr<Exp>>& args);
 std::shared_ptr<Exp> builtin_sub(Env& env, std::vector<std::shared_ptr<Exp>>& args);
 std::shared_ptr<Exp> builtin_mul(Env& env, std::vector<std::shared_ptr<Exp>>& args);

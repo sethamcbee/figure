@@ -12,6 +12,21 @@
 #include "exp.h"
 #include "lambda.h"
 
+/// Replace all instances of substr in src
+static void replace_all(
+    std::string& str,
+    const std::string& from,
+    const std::string& to)
+{
+    size_t len = from.length();
+    size_t pos = str.find(from);
+    while (pos != std::string::npos)
+    {
+        str.replace(pos, len, to);
+        pos = str.find(from);
+    }
+}
+
 std::shared_ptr<Exp> builtin_lambda(Env& env, std::vector<std::shared_ptr<Exp>>& args)
 {
     Lambda* lam = new Lambda;
@@ -95,20 +110,30 @@ std::shared_ptr<Exp> builtin_if(Env& env, std::vector<std::shared_ptr<Exp>>& arg
     }
 }
 
-std::shared_ptr<Exp> builtin_print(Env& env, std::vector<std::shared_ptr<Exp>>& args)
+std::shared_ptr<Exp> builtin_display(Env& env, std::vector<std::shared_ptr<Exp>>& args)
 {
     auto val = args[0]->eval(env);
     if (val->type == Type::NUMBER)
     {
-        std::cout << val->get_number() << "\n";
+        std::cout << val->get_number();
     }
     else if (val->type == Type::BOOLEAN)
     {
-        std::cout << val->get_bool() << "\n";
+        std::cout << val->get_bool();
     }
     else if (val->type == Type::STRING)
     {
-        std::cout << val->get_string() << "\n";
+        // Escape newlines.
+        if (val->get_string().find("\\n") == std::string::npos)
+        {
+            std::cout << val->get_string();
+        }
+        else
+        {
+            std::string edit = val->get_string();
+            replace_all(edit, "\\n", "\n");
+            std::cout << edit;
+        }
     }
 
     // Return evaluated expression.

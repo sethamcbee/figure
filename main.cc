@@ -43,6 +43,7 @@ int main(int argc, char** argv)
 
     // Evaluate expression and print result.
     std::shared_ptr<Exp> result = Figure::eval(input.str());
+    std::cout << std::endl;
     result->print();
     std::cout << std::endl;
 

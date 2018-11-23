@@ -520,7 +520,15 @@ std::shared_ptr<Exp> Exp::get_list() const
 {
     if (type == Type::LIST)
     {
-        return *(std::shared_ptr<Exp>*)data;
+        if (data)
+        {
+            return *(std::shared_ptr<Exp>*)data;
+        }
+        else
+        {
+            // Empty list.
+            return nullptr;
+        }
     }
     else
     {

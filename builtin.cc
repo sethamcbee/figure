@@ -74,10 +74,10 @@ std::shared_ptr<Exp> builtin_let(Env& env, std::vector<std::shared_ptr<Exp>>& ar
     auto new_env = env.spawn();
     if (args[0]->type == Type::LIST)
     {
-        auto ind = *(std::shared_ptr<Exp>*)args[0]->data;
+        auto ind = args[0]->get_list();
         while (ind)
         {
-            auto var = *(std::shared_ptr<Exp>*)ind->data;
+            auto var = ind->get_list();
             new_env->let(var->get_string(), var->link->eval(env));
             ind = ind->link;
         }

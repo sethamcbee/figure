@@ -14,7 +14,7 @@ public:
 
     std::vector<std::string> args;
     Env env;
-    std::vector<Exp*> bodies;
+    std::vector<std::shared_ptr<Exp>> bodies;
 };
 
 #endif // LAMBDA_H

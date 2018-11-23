@@ -119,6 +119,11 @@ size_t skip_list(const std::string& str, size_t start, size_t end)
     std::exit(1);
 }
 
+std::shared_ptr<Exp> Exp::spawn()
+{
+    return std::shared_ptr<Exp>(new Exp);
+}
+
 Exp::Exp()
 {
     type = Type::VOID;
@@ -126,7 +131,7 @@ Exp::Exp()
     link = nullptr;
 }
 
-Exp::Exp(const std::string& str, size_t start, size_t end)
+void Exp::parse(const std::string& str, size_t start, size_t end)
 {
     // Find next token.
     size_t tok_start = next_token(str, start, end);
@@ -170,7 +175,7 @@ Exp::Exp(const std::string& str, size_t start, size_t end)
         // Build list.
         type = Type::LIST;
         size_t pos = tok_start + 1;
-        Exp* exp = this;
+        std::shared_ptr<Exp> exp = shared_from_this();
         while (exp != nullptr)
         {
             // Get next element.
@@ -182,14 +187,16 @@ Exp::Exp(const std::string& str, size_t start, size_t end)
                 // Check if this is the first element.
                 if (data)
                 {
-                    exp->link = new Exp(str, pos, tok_end);
+                    exp->link = Exp::spawn();
+                    exp->link->parse(str, pos, tok_end);
                     exp = exp->link;
                     pos = tok_end;
                 }
                 else
                 {
-                    data = new Exp(str, pos, tok_end);
-                    exp = (Exp*)data;
+                    data = new std::shared_ptr<Exp>(Exp::spawn());
+                    exp = *(std::shared_ptr<Exp>*)data;
+                    exp->parse(str, pos, tok_end);
                     pos = tok_end;
                 }
             }
@@ -267,7 +274,7 @@ Exp::~Exp()
     }
     else if (type == Type::LIST)
     {
-        Exp* p = (Exp*)data;
+        auto p = (std::shared_ptr<Exp>*)data;
         delete p;
     }
     else if (type == Type::NATIVE_FUNCTION)
@@ -291,59 +298,58 @@ Exp::~Exp()
     }
 }
 
-Exp* Exp::eval(Env& env)
+std::shared_ptr<Exp> Exp::eval(Env& env)
 {
     // Return atoms as-is.
     if (type == Type::STRING)
     {
-        return this;
+        return std::shared_ptr<Exp>(this);
     }
     else if (type == Type::BOOLEAN)
     {
-        return this;
+        return std::shared_ptr<Exp>(this);
     }
     else if (type == Type::NUMBER)
     {
-        return this;
+        return std::shared_ptr<Exp>(this);
     }
     else if (type == Type::VOID)
     {
-        return this;
+        return std::shared_ptr<Exp>(this);
     }
 
     // Evaluate symbols, functions, and lists.
     if (type == Type::SYMBOL)
     {
         std::string* sym = (std::string*)data;
-        const Exp* ret = &env.get(*sym);
-        return (Exp*)ret;
+        return env.get(*sym);
     }
     if (type == Type::NATIVE_FUNCTION)
     {
-        return this;
+        return std::shared_ptr<Exp>(this);
     }
     else if (type == Type::LAMBDA)
     {
-        return this;
+        return std::shared_ptr<Exp>(this);
     }
     else if (type == Type::LIST)
     {
-        Exp* first = (Exp*)data;
+        std::shared_ptr<Exp> first = *(std::shared_ptr<Exp>*)data;
 
         // Check if this is an empty list.
         if (first == nullptr)
         {
-            return this;
+            return std::shared_ptr<Exp>(this);
         }
 
         // Check if this is a function application.
-        Exp* op = first->eval(env);
+        auto op = first->eval(env);
         if (op->type == Type::NATIVE_FUNCTION)
         {
             // Check for built-in function.
             Native_Function& fn = op->get_native_function();
-            std::vector<Exp*> args;
-            Exp* next_arg = first->link;
+            std::vector<std::shared_ptr<Exp>> args;
+            std::shared_ptr<Exp> next_arg = first->link;
             while (next_arg)
             {
                 args.push_back(next_arg);
@@ -357,7 +363,7 @@ Exp* Exp::eval(Env& env)
             Lambda* lam = (Lambda*)op->data;
             Env new_env = lam->env;
             size_t arg_count = lam->args.size();
-            Exp* next_arg = first->link;
+            std::shared_ptr<Exp> next_arg = first->link;
             for (size_t i = 0; i < arg_count; ++i)
             {
                 new_env.let(lam->args[i], next_arg->eval(env));
@@ -365,7 +371,7 @@ Exp* Exp::eval(Env& env)
             }
 
             // Iterate over bodies.
-            Exp* ret = nullptr;
+            std::shared_ptr<Exp> ret = nullptr;
             size_t body_count = lam->bodies.size();
             for (size_t i = 0; i < body_count; ++i)
             {
@@ -377,7 +383,7 @@ Exp* Exp::eval(Env& env)
             }
             else
             {
-                return new Exp;
+                return std::shared_ptr<Exp>(new Exp);
             }
         }
 
@@ -388,7 +394,7 @@ Exp* Exp::eval(Env& env)
         }
 
         // Else, return the full list.
-        return this;
+        return std::shared_ptr<Exp>(this);
     }
     else
     {
@@ -425,7 +431,7 @@ void Exp::print() const
         std::cout << '(';
 
         // Print first element.
-        Exp* p = (Exp*)data;
+        auto p = *(std::shared_ptr<Exp>*)data;
         if (p != nullptr)
         {
             p->print();

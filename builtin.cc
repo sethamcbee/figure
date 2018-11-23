@@ -12,7 +12,7 @@
 #include "exp.h"
 #include "lambda.h"
 
-Exp* builtin_lambda(Env& env, std::vector<Exp*>& args)
+std::shared_ptr<Exp> builtin_lambda(Env& env, std::vector<std::shared_ptr<Exp>>& args)
 {
     Lambda* lam = new Lambda;
     lam->env = env;
@@ -20,7 +20,7 @@ Exp* builtin_lambda(Env& env, std::vector<Exp*>& args)
     // Get parameters.
     if (args[0]->type == Type::LIST)
     {
-        Exp* it = (Exp*)args[0]->data;
+        auto it = *(std::shared_ptr<Exp>*)(args[0]->data);
         while (it)
         {
             lam->args.push_back(it->get_string());
@@ -36,23 +36,23 @@ Exp* builtin_lambda(Env& env, std::vector<Exp*>& args)
     }
 
     // Build expression.
-    Exp* exp = new Exp;
+    std::shared_ptr<Exp> exp = Exp::spawn();
     exp->type = Type::LAMBDA;
     exp->data = lam;
 
     return exp;
 }
 
-Exp* builtin_let(Env& env, std::vector<Exp*>& args)
+std::shared_ptr<Exp> builtin_let(Env& env, std::vector<std::shared_ptr<Exp>>& args)
 {
     // Build new environment.
     auto new_env = env.spawn();
     if (args[0]->type == Type::LIST)
     {
-        Exp* ind = (Exp*)args[0]->data;
+        auto ind = *(std::shared_ptr<Exp>*)args[0]->data;
         while (ind)
         {
-            Exp* var = (Exp*)ind->data;
+            auto var = *(std::shared_ptr<Exp>*)ind->data;
             new_env->let(var->get_string(), var->link->eval(env));
             ind = ind->link;
         }
@@ -70,12 +70,12 @@ Exp* builtin_let(Env& env, std::vector<Exp*>& args)
     }
 }
 
-Exp* builtin_if(Env& env, std::vector<Exp*>& args)
+std::shared_ptr<Exp> builtin_if(Env& env, std::vector<std::shared_ptr<Exp>>& args)
 {
     // Evaluate condition.
     bool b;
 
-    Exp* cond = args[0]->eval(env);
+    auto cond = args[0]->eval(env);
     if (cond->type == Type::BOOLEAN)
     {
         b = cond->get_bool();
@@ -95,9 +95,9 @@ Exp* builtin_if(Env& env, std::vector<Exp*>& args)
     }
 }
 
-Exp* builtin_print(Env& env, std::vector<Exp*>& args)
+std::shared_ptr<Exp> builtin_print(Env& env, std::vector<std::shared_ptr<Exp>>& args)
 {
-    Exp* val = args[0]->eval(env);
+    auto val = args[0]->eval(env);
     if (val->type == Type::NUMBER)
     {
         std::cout << val->get_number() << "\n";
@@ -115,12 +115,12 @@ Exp* builtin_print(Env& env, std::vector<Exp*>& args)
     return val;
 }
 
-Exp* builtin_add(Env& env, std::vector<Exp*>& args)
+std::shared_ptr<Exp> builtin_add(Env& env, std::vector<std::shared_ptr<Exp>>& args)
 {
     Number_Type n0 = args[0]->eval(env)->get_number();
     Number_Type n1 = args[1]->eval(env)->get_number();
 
-    Exp* ret = new Exp;
+    auto ret = Exp::spawn();
     ret->type = Type::NUMBER;
     ret->data = new Number_Type;
     Number_Type* p = (Number_Type*)ret->data;
@@ -129,12 +129,12 @@ Exp* builtin_add(Env& env, std::vector<Exp*>& args)
     return ret;
 }
 
-Exp* builtin_sub(Env& env, std::vector<Exp*>& args)
+std::shared_ptr<Exp> builtin_sub(Env& env, std::vector<std::shared_ptr<Exp>>& args)
 {
     Number_Type n0 = args[0]->eval(env)->get_number();
     Number_Type n1 = args[1]->eval(env)->get_number();
 
-    Exp* ret = new Exp;
+    auto ret = Exp::spawn();
     ret->type = Type::NUMBER;
     ret->data = new Number_Type;
     Number_Type* p = (Number_Type*)ret->data;
@@ -143,12 +143,12 @@ Exp* builtin_sub(Env& env, std::vector<Exp*>& args)
     return ret;
 }
 
-Exp* builtin_mul(Env& env, std::vector<Exp*>& args)
+std::shared_ptr<Exp> builtin_mul(Env& env, std::vector<std::shared_ptr<Exp>>& args)
 {
     Number_Type n0 = args[0]->eval(env)->get_number();
     Number_Type n1 = args[1]->eval(env)->get_number();
 
-    Exp* ret = new Exp;
+    auto ret = Exp::spawn();
     ret->type = Type::NUMBER;
     ret->data = new Number_Type;
     Number_Type* p = (Number_Type*)ret->data;
@@ -157,12 +157,12 @@ Exp* builtin_mul(Env& env, std::vector<Exp*>& args)
     return ret;
 }
 
-Exp* builtin_div(Env& env, std::vector<Exp*>& args)
+std::shared_ptr<Exp> builtin_div(Env& env, std::vector<std::shared_ptr<Exp>>& args)
 {
     Number_Type n0 = args[0]->eval(env)->get_number();
     Number_Type n1 = args[1]->eval(env)->get_number();
 
-    Exp* ret = new Exp;
+    auto ret = Exp::spawn();
     ret->type = Type::NUMBER;
     ret->data = new Number_Type;
     Number_Type* p = (Number_Type*)ret->data;

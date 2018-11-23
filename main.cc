@@ -34,16 +34,15 @@ int main(int argc, char** argv)
     }
 
     // Read input file.
-    std::stringstream input_buffer;
-    input_buffer << input_file.rdbuf();
+    std::stringstream input;
+    input << input_file.rdbuf();
     input_file.close();
-    std::string input = input_buffer.str();
 
     // Print input file.
-    std::cout << input << std::endl;
+    std::cout << input.str() << std::endl;
 
     // Evaluate expression and print result.
-    std::shared_ptr<Exp> result = Figure::eval(input);
+    std::shared_ptr<Exp> result = Figure::eval(input.str());
     result->print();
     std::cout << std::endl;
 

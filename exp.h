@@ -26,19 +26,20 @@ size_t skip_string(const std::string& str, size_t start, size_t end);
 /// Skip to end of a list.
 size_t skip_list(const std::string& str, size_t start, size_t end);
 
-class Exp
+class Exp : public std::enable_shared_from_this<Exp>
 {
 public:
 
-    Exp();
+    /// Spawn an Exp.
+    static std::shared_ptr<Exp> spawn();
 
     /// Parse a string to build an s-expression.
-    Exp(const std::string& str, size_t start, size_t end);
+    void parse(const std::string& str, size_t start, size_t end);
 
     ~Exp();
 
     /// Evaluate an expression.
-    Exp* eval(Env& env);
+    std::shared_ptr<Exp> eval(Env& env);
 
     /// Print the contents of an expression.
     void print() const;
@@ -58,9 +59,13 @@ public:
     Type type = Type::VOID;
 
     /// Pointer to the next list entry.
-    Exp* link = nullptr;
+    std::shared_ptr<Exp> link = nullptr;
 
     void* data = nullptr;
+
+private:
+
+    Exp();
 };
 
 #endif // EXP_H

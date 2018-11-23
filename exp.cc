@@ -334,19 +334,33 @@ Exp* Exp::eval(Env& env)
             Exp* exp0 = first->link->eval(env);
             if (exp0->type == Type::NUMBER)
             {
-                std::cout << exp0->get_number();
+                std::cout << exp0->get_number() << "\n";
             }
             else if (exp0->type == Type::BOOLEAN)
             {
-                std::cout << exp0->get_bool();
+                std::cout << exp0->get_bool() << "\n";
             }
             else if (exp0->type == Type::STRING)
             {
-                std::cout << exp0->get_string();
+                std::cout << exp0->get_string() << "\n";
             }
 
             // Return void.
             return new Exp;
+        }
+        else if (op == "let")
+        {
+            // Get args.
+            Exp* exp0 = first->link;
+            Exp* exp1 = exp0->link;
+            Exp* exp2 = exp1->link;
+            std::string id = exp0->get_string();
+            Exp* val = exp1->eval(env);
+
+            // Build new environment and execute.
+            auto new_env = env.spawn();
+            new_env->let(id, *val);
+            return exp2->eval(*new_env);
         }
         else
         {

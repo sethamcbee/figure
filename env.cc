@@ -30,3 +30,10 @@ void Env::let(const std::string& name, const Exp& val)
 {
     symbols[name] = val;
 }
+
+std::unique_ptr<Env> Env::spawn()
+{
+    std::unique_ptr<Env> new_env(new Env);
+    new_env->parent = this;
+    return new_env;
+}

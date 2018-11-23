@@ -24,7 +24,7 @@ public:
     void let(const std::string& name, const Exp& val);
 
     /// Spawn a new environment, with this as the parent environment.
-    std::unique_ptr<Env> spawn() const;
+    std::unique_ptr<Env> spawn();
 
 private:
 

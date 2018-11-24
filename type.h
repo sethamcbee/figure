@@ -33,9 +33,9 @@ typedef std::pair<std::shared_ptr<Env>, std::shared_ptr<Exp>> Task;
 
 typedef double Number_Type;
 typedef std::function
-    <std::shared_ptr<Exp>
-        (Env& env,
-        std::vector<std::shared_ptr<Exp>>&)>
-    Native_Function;
+<std::shared_ptr<Exp>
+(Env& env,
+ std::vector<std::shared_ptr<Exp>>&)>
+Native_Function;
 
 #endif // TYPE_H

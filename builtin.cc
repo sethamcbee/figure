@@ -152,56 +152,72 @@ std::shared_ptr<Exp> builtin_display(Env& env, std::vector<std::shared_ptr<Exp>>
 
 std::shared_ptr<Exp> builtin_add(Env& env, std::vector<std::shared_ptr<Exp>>& args)
 {
-    Number_Type n0 = args[0]->eval(env)->get_number();
-    Number_Type n1 = args[1]->eval(env)->get_number();
+    Number_Type val = 1;
+    size_t count = args.size();
+    for (size_t i = 0; i < count; ++i)
+    {
+        val += args[i]->eval(env)->get_number();
+    }
 
     auto ret = Exp::spawn();
     ret->type = Type::NUMBER;
     ret->data = new Number_Type;
     Number_Type* p = (Number_Type*)ret->data;
-    *p = n0 + n1;
+    *p = val;
 
     return ret;
 }
 
 std::shared_ptr<Exp> builtin_sub(Env& env, std::vector<std::shared_ptr<Exp>>& args)
 {
-    Number_Type n0 = args[0]->eval(env)->get_number();
-    Number_Type n1 = args[1]->eval(env)->get_number();
+    Number_Type val = args[0]->eval(env)->get_number();
+    size_t count = args.size();
+    for (size_t i = 1; i < count; ++i)
+    {
+        val -= args[i]->eval(env)->get_number();
+    }
 
     auto ret = Exp::spawn();
     ret->type = Type::NUMBER;
     ret->data = new Number_Type;
     Number_Type* p = (Number_Type*)ret->data;
-    *p = n0 - n1;
+    *p = val;
 
     return ret;
 }
 
 std::shared_ptr<Exp> builtin_mul(Env& env, std::vector<std::shared_ptr<Exp>>& args)
 {
-    Number_Type n0 = args[0]->eval(env)->get_number();
-    Number_Type n1 = args[1]->eval(env)->get_number();
+    Number_Type val = args[0]->eval(env)->get_number();
+    size_t count = args.size();
+    for (size_t i = 1; i < count; ++i)
+    {
+        val *= args[i]->eval(env)->get_number();
+    }
 
     auto ret = Exp::spawn();
     ret->type = Type::NUMBER;
     ret->data = new Number_Type;
     Number_Type* p = (Number_Type*)ret->data;
-    *p = n0 * n1;
+    *p = val;
 
     return ret;
 }
 
 std::shared_ptr<Exp> builtin_div(Env& env, std::vector<std::shared_ptr<Exp>>& args)
 {
-    Number_Type n0 = args[0]->eval(env)->get_number();
-    Number_Type n1 = args[1]->eval(env)->get_number();
+    Number_Type val = args[0]->eval(env)->get_number();
+    size_t count = args.size();
+    for (size_t i = 1; i < count; ++i)
+    {
+        val /= args[i]->eval(env)->get_number();
+    }
 
     auto ret = Exp::spawn();
     ret->type = Type::NUMBER;
     ret->data = new Number_Type;
     Number_Type* p = (Number_Type*)ret->data;
-    *p = n0 / n1;
+    *p = val;
 
     return ret;
 }

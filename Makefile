@@ -8,7 +8,7 @@ PROFILE ?= 0
 
 # Check if we are debugging.
 ifeq ($(RELEASE), 0)
-	CXXFLAGS += -ggdb -Og
+	CXXFLAGS += -fverbose-asm -ggdb -Og
 else
 	CXXFLAGS += -O2 -DNDEBUG
 endif
@@ -26,6 +26,7 @@ HEADERS = $(shell find . -name "*.h")
 
 # Build list of object file targets.
 OBJECTS = $(addprefix build/, $(SOURCES:.cc=.o))
+ASM = $(OBJECTS:.o=.s)
 
 # Build list of compiler-generated dependencies.
 DEPS = $(OBJECTS:.o=.d)
@@ -60,6 +61,10 @@ build: figure
 .PHONY: doc
 doc: html/index.html
 
+# Export generated assembly.
+.PHONY: asm
+asm: $(ASM)
+
 # Generate documentation.
 html/index.html: Doxyfile $(SOURCES) $(HEADERS)
 ifneq (, $(shell which doxygen))
@@ -93,3 +98,8 @@ figure: $(OBJECTS)
 build/%.o: %.cc
 	mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) -MD -o $@ -c $<
+
+# Export generated assembly.
+build/%.s: build/%.o
+	mkdir -p $(@D)
+	objdump --no-show-raw-insn -drwSC $< > $@

@@ -152,9 +152,9 @@ std::shared_ptr<Exp> builtin_display(Env& env, std::vector<std::shared_ptr<Exp>>
 
 std::shared_ptr<Exp> builtin_add(Env& env, std::vector<std::shared_ptr<Exp>>& args)
 {
-    Number_Type val = 1;
+    Number_Type val = args[0]->eval(env)->get_number();
     size_t count = args.size();
-    for (size_t i = 0; i < count; ++i)
+    for (size_t i = 1; i < count; ++i)
     {
         val += args[i]->eval(env)->get_number();
     }

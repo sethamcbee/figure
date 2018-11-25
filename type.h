@@ -29,13 +29,18 @@ enum class Type
 };
 
 // Expressions to be evaluated, with their matching environment.
-typedef std::pair<std::shared_ptr<Env>, std::shared_ptr<Exp>> Task;
+class Task
+{
+public:
+
+    /// Task to forward return values to.
+    Task* parent = nullptr;
+    std::shared_ptr<Env> env;
+    std::shared_ptr<Exp> exp;
+    std::vector<std::shared_ptr<Exp>> args;
+};
 
 typedef double Number_Type;
-typedef std::function
-<std::shared_ptr<Exp>
-(Env& env,
- std::vector<std::shared_ptr<Exp>>&)>
-Native_Function;
+typedef std::function<void(std::stack<Task>&)> Native_Function;
 
 #endif // TYPE_H

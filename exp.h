@@ -38,9 +38,6 @@ public:
 
     ~Exp();
 
-    /// Evaluate an expression.
-    std::shared_ptr<Exp> eval(Env& env);
-
     /// Print the contents of an expression.
     void print() const;
 

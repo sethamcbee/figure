@@ -3,6 +3,7 @@
  * @brief Implementation of built-in functions.
  */
 
+#include <cassert>
 #include <cstdlib>
 #include <iostream>
 #include <vector>
@@ -26,6 +27,48 @@ static void replace_all(
         pos = str.find(from);
     }
 }
+
+void eval_if(std::stack<Task>& tasks)
+{
+    Task& cur_task = tasks.top();
+    Task* parent = cur_task.parent;
+    auto& env = cur_task.env;
+    auto& exp = cur_task.exp;
+    auto& args = cur_task.args;
+
+    // Check if the condition needs evaluated.
+    if (args.size() == 1)
+    {
+        Task dep;
+        dep.parent = &cur_task;
+        dep.env = env;
+        dep.exp = exp->get_list()->link;
+        tasks.push(dep);
+        return;
+    }
+
+    // Evaluate if statement.
+    if (args[1]->get_bool())
+    {
+        Task next;
+        next.parent = parent;
+        next.env = env;
+        next.exp = exp->get_list()->link->link;
+        tasks.pop();
+        tasks.push(next);
+    }
+    else
+    {
+        Task next;
+        next.parent = parent;
+        next.env = env;
+        next.exp = exp->get_list()->link->link->link;
+        tasks.pop();
+        tasks.push(next);
+    }
+}
+
+#if 0
 
 std::shared_ptr<Exp> builtin_lambda(Env& env, std::vector<std::shared_ptr<Exp>>& args)
 {
@@ -221,3 +264,5 @@ std::shared_ptr<Exp> builtin_div(Env& env, std::vector<std::shared_ptr<Exp>>& ar
 
     return ret;
 }
+
+#endif

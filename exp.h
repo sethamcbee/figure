@@ -10,6 +10,7 @@
 #include "type.h"
 
 class Env;
+class Lambda;
 
 /// Find the start of the next symbol, string, or list.
 size_t next_token(const std::string& str, size_t start, size_t end);
@@ -52,6 +53,9 @@ public:
 
     /// Get a native function from this expression.
     Native_Function& get_native_function() const;
+
+    /// Get a lambda from this expression.
+    Lambda& get_lambda() const;
 
     /// Get the first element of a list.
     std::shared_ptr<Exp> get_list() const;

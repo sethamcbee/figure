@@ -11,6 +11,7 @@
 #include "env.h"
 #include "exp.h"
 #include "figure.h"
+#include "lambda.h"
 #include "type.h"
 
 std::shared_ptr<Exp> Figure::eval(const std::string& prog)
@@ -26,6 +27,8 @@ std::shared_ptr<Exp> Figure::eval(const std::string& prog)
     exp_false->data = new bool(false);
     init_env->let("false", exp_false);
     init_env->builtin("if", eval_if);
+    init_env->builtin("lambda", eval_lambda);
+    init_env->builtin("let", eval_let);
 
     // Parse input.
     std::shared_ptr<Exp> root = Exp::spawn();
@@ -62,7 +65,10 @@ std::shared_ptr<Exp> Figure::eval(const std::string& prog)
 
         case Type::SYMBOL:
             // Retrieve value bound to this symbol.
-            parent->args.push_back(env->get(exp->get_string()));
+            if (parent)
+            {
+                parent->args.push_back(env->get(exp->get_string()));
+            }
             tasks.pop();
             break;
 
@@ -70,7 +76,10 @@ std::shared_ptr<Exp> Figure::eval(const std::string& prog)
             // If empty list, just return.
             if (exp->get_list() == nullptr)
             {
-                parent->args.push_back(exp);
+                if (parent)
+                {
+                    parent->args.push_back(exp);
+                }
                 tasks.pop();
                 break;
             }
@@ -86,7 +95,9 @@ std::shared_ptr<Exp> Figure::eval(const std::string& prog)
                 break;
             }
             // Check if we should evaluate the first element.
-            else if (args.size() == 0 && exp->get_list()->type == Type::SYMBOL)
+            else if (args.size() == 0
+                     && ((exp->get_list()->type == Type::SYMBOL)
+                         || (exp->get_list()->type == Type::LIST)))
             {
                 Task dep;
                 dep.parent = &cur_task;
@@ -98,8 +109,62 @@ std::shared_ptr<Exp> Figure::eval(const std::string& prog)
             // Check if this is a lambda substitution.
             else if (args.size() > 0 && args[0]->type == Type::LAMBDA)
             {
-                std::cerr << "Lambda's are not yet supported.\n";
-                std::exit(1);
+                // Check if arguments need evaluated.
+                if (args.size() == 1)
+                {
+                    // Build list of arguments.
+                    std::stack<Task> arg_stack;
+                    for (auto it = exp->get_list()->link; it; it = it->link)
+                    {
+                        Task dep;
+                        dep.parent = &cur_task;
+                        dep.env = env;
+                        dep.exp = it;
+                        arg_stack.push(dep);
+                    }
+
+                    // Pass to be evaluated in reverse order.
+                    while (!arg_stack.empty())
+                    {
+                        tasks.push(arg_stack.top());
+                        arg_stack.pop();
+                    }
+
+                    break;
+                }
+
+                // Substitute evaluated arguments and build closure.
+                auto& lam = args[0]->get_lambda();
+                auto new_env = env->spawn();
+                size_t arg_count = lam.args.size();
+                for (size_t i = 0; i < arg_count; ++i)
+                {
+                    new_env->let(lam.args[i], args[i+1]);
+                }
+
+                // Evaluate bodies and return result from last body.
+                std::stack<Task> bodies;
+                size_t body_count = lam.bodies.size();
+                for (size_t i = 0; i < body_count - 1; ++i)
+                {
+                    Task body;
+                    body.parent = nullptr;
+                    body.env = new_env;
+                    body.exp = lam.bodies[i];
+                    bodies.push(body);
+                }
+                Task ret;
+                ret.parent = parent;
+                ret.env = new_env;
+                ret.exp = lam.bodies[body_count - 1];
+                tasks.pop();
+                tasks.push(ret);
+                while (!bodies.empty())
+                {
+                    tasks.push(bodies.top());
+                    bodies.pop();
+                }
+
                 break;
             }
             // Check if this is a native function call.
@@ -112,7 +177,10 @@ std::shared_ptr<Exp> Figure::eval(const std::string& prog)
             // Else, return list as-is.
             else
             {
-                parent->args.push_back(exp);
+                if (parent)
+                {
+                    parent->args.push_back(exp);
+                }
                 tasks.pop();
                 break;
             }

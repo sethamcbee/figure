@@ -410,6 +410,20 @@ Native_Function& Exp::get_native_function() const
     }
 }
 
+Lambda& Exp::get_lambda() const
+{
+    if (type == Type::LAMBDA)
+    {
+        Lambda* p = (Lambda*)data;
+        return *p;
+    }
+    else
+    {
+        std::cerr << "Error: Invalid attempt to treat object as a lambda.\n";
+        std::exit(1);
+    }
+}
+
 std::shared_ptr<Exp> Exp::get_list() const
 {
     if (type == Type::LIST)

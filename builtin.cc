@@ -68,48 +68,128 @@ void eval_if(std::stack<Task>& tasks)
     }
 }
 
-#if 0
-
-std::shared_ptr<Exp> builtin_lambda(Env& env, std::vector<std::shared_ptr<Exp>>& args)
+void eval_lambda(std::stack<Task>& tasks)
 {
+    Task& cur_task = tasks.top();
+    Task* parent = cur_task.parent;
+    auto& env = cur_task.env;
+    auto& exp = cur_task.exp;
+
     Lambda* lam = new Lambda;
-    lam->env = env;
+    lam->env = *env;
 
     // Get parameters.
-    if (args[0]->type == Type::LIST)
+    auto lam_args = exp->get_list()->link;
+    if (lam_args->type == Type::LIST)
     {
-        auto it = args[0]->get_list();
+        auto it = lam_args->get_list();
         while (it)
         {
             lam->args.push_back(it->get_string());
             it = it->link;
         }
     }
-    else if (args[0]->type == Type::SYMBOL)
+    else if (lam_args->type == Type::SYMBOL)
     {
         // Get single parameter.
-        lam->args.push_back(args[0]->get_string());
+        lam->args.push_back(lam_args->get_string());
     }
     else
     {
-        std::cerr << "Error: Incorrectly constructed lambda.\n";
+        std::cerr << "Improperly formatted lambda.\n";
         std::exit(1);
     }
 
     // Get bodies.
-    size_t count = args.size();
-    for (size_t i = 1; i < count; ++i)
+    auto& body = lam_args->link;
+    while (body)
     {
-        lam->bodies.push_back(args[i]);
+        lam->bodies.push_back(body);
+        body = body->link;
     }
 
-    // Build expression.
-    std::shared_ptr<Exp> exp = Exp::spawn();
-    exp->type = Type::LAMBDA;
-    exp->data = lam;
-
-    return exp;
+    // Build and return expression.
+    auto ret = Exp::spawn();
+    ret->type = Type::LAMBDA;
+    ret->data = lam;
+    parent->args.push_back(ret);
+    tasks.pop();
 }
+
+void eval_let(std::stack<Task>& tasks)
+{
+    Task& cur_task = tasks.top();
+    Task* parent = cur_task.parent;
+    auto& env = cur_task.env;
+    auto& exp = cur_task.exp;
+    auto& args = cur_task.args;
+
+    // Check if all let expressions have been evaluated.
+    if (args.size() == 1)
+    {
+        if (exp->get_list()->link->type == Type::SYMBOL)
+        {
+            Task dep;
+            dep.parent = &cur_task;
+            dep.env = env;
+            dep.exp = exp->get_list()->link->link;
+            tasks.push(dep);
+            return;
+        }
+        else if (exp->get_list()->link->type == Type::LIST)
+        {
+            // Get bodies.
+            std::stack<Task> deps;
+            auto ind = exp->link->get_list();
+            while (ind)
+            {
+                Task dep;
+                dep.parent = &cur_task;
+                dep.env = env;
+                dep.exp = ind->get_list()->link;
+                deps.push(dep);
+                ind = ind->link;
+            }
+
+            // Add to evaluation stack in reverse order.
+            while (!deps.empty())
+            {
+                tasks.push(deps.top());
+                deps.pop();
+            }
+
+            return;
+        }
+    }
+
+    // Build environment.
+    auto new_env = env->spawn();
+    size_t arg = 1;
+    auto it = exp->get_list()->link;
+    if (it->type == Type::LIST)
+    {
+        while (it)
+        {
+            new_env->let(it->get_list()->get_string(), args[arg]);
+            it = it->link;
+            ++arg;
+        }
+    }
+    else if (it->type == Type::SYMBOL)
+    {
+        new_env->let(it->get_string(), args[1]);
+    }
+
+    // Build task.
+    Task ret;
+    ret.parent = parent;
+    ret.env = new_env;
+    ret.exp = exp->get_list()->link->link;
+    tasks.pop();
+    tasks.push(ret);
+}
+
+#if 0
 
 std::shared_ptr<Exp> builtin_let(Env& env, std::vector<std::shared_ptr<Exp>>& args)
 {

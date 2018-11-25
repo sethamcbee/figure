@@ -16,6 +16,8 @@ class Env;
 class Task;
 
 void eval_if(std::stack<Task>& tasks);
+void eval_lambda(std::stack<Task>& tasks);
+void eval_let(std::stack<Task>& tasks);
 
 std::shared_ptr<Exp> builtin_lambda(Env& env, std::vector<std::shared_ptr<Exp>>& args);
 std::shared_ptr<Exp> builtin_let(Env& env, std::vector<std::shared_ptr<Exp>>& args);

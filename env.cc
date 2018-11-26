@@ -17,7 +17,14 @@ bool Env::is_bound(const std::string& name)
     }
     else
     {
-        return false;
+        if (parent)
+        {
+            return parent->is_bound(name);
+        }
+        else
+        {
+            return false;
+        }
     }
 }
 
@@ -56,6 +63,6 @@ void Env::builtin(const std::string& name, const Native_Function& fn)
 std::shared_ptr<Env> Env::spawn()
 {
     std::shared_ptr<Env> new_env(new Env);
-    new_env->parent = this;
+    new_env->parent = shared_from_this();
     return new_env;
 }

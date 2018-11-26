@@ -15,9 +15,13 @@ class Exp;
 class Env;
 class Task;
 
-void eval_if(std::stack<Task>& tasks);
-void eval_lambda(std::stack<Task>& tasks);
-void eval_let(std::stack<Task>& tasks);
+void eval_if(std::stack<std::shared_ptr<Task>>& tasks);
+void eval_lambda(std::stack<std::shared_ptr<Task>>& tasks);
+void eval_let(std::stack<std::shared_ptr<Task>>& tasks);
+void eval_add(std::stack<std::shared_ptr<Task>>& tasks);
+void eval_sub(std::stack<std::shared_ptr<Task>>& tasks);
+void eval_mul(std::stack<std::shared_ptr<Task>>& tasks);
+void eval_div(std::stack<std::shared_ptr<Task>>& tasks);
 
 std::shared_ptr<Exp> builtin_lambda(Env& env, std::vector<std::shared_ptr<Exp>>& args);
 std::shared_ptr<Exp> builtin_let(Env& env, std::vector<std::shared_ptr<Exp>>& args);

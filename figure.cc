@@ -29,26 +29,36 @@ std::shared_ptr<Exp> Figure::eval(const std::string& prog)
     init_env->builtin("if", eval_if);
     init_env->builtin("lambda", eval_lambda);
     init_env->builtin("let", eval_let);
+    init_env->builtin("+", eval_add);
+    init_env->builtin("-", eval_sub);
+    init_env->builtin("*", eval_mul);
+    init_env->builtin("/", eval_div);
 
     // Parse input.
     std::shared_ptr<Exp> root = Exp::spawn();
     root->parse(prog, 0, prog.length());
 
     // Evaluate program.
-    Task result;
-    std::stack<Task> tasks;
-    Task first_task;
-    first_task.parent = &result;
-    first_task.env = init_env;
-    first_task.exp = root;
+    std::shared_ptr<Task> result(new Task);
+    result->parent = result;
+    std::stack<std::shared_ptr<Task>> tasks;
+    std::shared_ptr<Task> first_task(new Task);
+    first_task->parent = result;
+    first_task->env = init_env;
+    first_task->exp = root;
     tasks.push(first_task);
     while (!tasks.empty())
     {
-        Task& cur_task = tasks.top();
-        Task* parent = cur_task.parent;
-        std::shared_ptr<Env>& env = cur_task.env;
-        std::shared_ptr<Exp>& exp = cur_task.exp;
-        std::vector<std::shared_ptr<Exp>>& args = cur_task.args;
+        std::shared_ptr<Task> cur_task = tasks.top();
+        std::shared_ptr<Task> parent = cur_task->parent;
+        std::shared_ptr<Env> env = cur_task->env;
+        std::shared_ptr<Exp> exp = cur_task->exp;
+        std::vector<std::shared_ptr<Exp>>& args = cur_task->args;
+
+#if 1
+        exp->print();
+        std::cout << std::endl;
+#endif
 
         switch (exp->type)
         {
@@ -86,10 +96,10 @@ std::shared_ptr<Exp> Figure::eval(const std::string& prog)
             // If one element, evaluate it and return.
             else if (!exp->get_list()->link)
             {
-                Task dep;
-                dep.parent = parent;
-                dep.env = env;
-                dep.exp = exp->get_list();
+                std::shared_ptr<Task> dep(new Task);
+                dep->parent = parent;
+                dep->env = env;
+                dep->exp = exp->get_list();
                 tasks.pop();
                 tasks.push(dep);
                 break;
@@ -99,10 +109,10 @@ std::shared_ptr<Exp> Figure::eval(const std::string& prog)
                      && ((exp->get_list()->type == Type::SYMBOL)
                          || (exp->get_list()->type == Type::LIST)))
             {
-                Task dep;
-                dep.parent = &cur_task;
-                dep.env = env;
-                dep.exp = exp->get_list();
+                std::shared_ptr<Task> dep(new Task);
+                dep->parent = cur_task;
+                dep->env = env;
+                dep->exp = exp->get_list();
                 tasks.push(dep);
                 break;
             }
@@ -113,13 +123,13 @@ std::shared_ptr<Exp> Figure::eval(const std::string& prog)
                 if (args.size() == 1)
                 {
                     // Build list of arguments.
-                    std::stack<Task> arg_stack;
+                    std::stack<std::shared_ptr<Task>> arg_stack;
                     for (auto it = exp->get_list()->link; it; it = it->link)
                     {
-                        Task dep;
-                        dep.parent = &cur_task;
-                        dep.env = env;
-                        dep.exp = it;
+                        std::shared_ptr<Task> dep(new Task);
+                        dep->parent = cur_task;
+                        dep->env = env;
+                        dep->exp = it;
                         arg_stack.push(dep);
                     }
 
@@ -143,20 +153,20 @@ std::shared_ptr<Exp> Figure::eval(const std::string& prog)
                 }
 
                 // Evaluate bodies and return result from last body.
-                std::stack<Task> bodies;
+                std::stack<std::shared_ptr<Task>> bodies;
                 size_t body_count = lam.bodies.size();
                 for (size_t i = 0; i < body_count - 1; ++i)
                 {
-                    Task body;
-                    body.parent = nullptr;
-                    body.env = new_env;
-                    body.exp = lam.bodies[i];
+                    std::shared_ptr<Task> body(new Task);
+                    body->parent = nullptr;
+                    body->env = new_env;
+                    body->exp = lam.bodies[i];
                     bodies.push(body);
                 }
-                Task ret;
-                ret.parent = parent;
-                ret.env = new_env;
-                ret.exp = lam.bodies[body_count - 1];
+                std::shared_ptr<Task> ret(new Task);
+                ret->parent = parent;
+                ret->env = new_env;
+                ret->exp = lam.bodies[body_count - 1];
                 tasks.pop();
                 tasks.push(ret);
                 while (!bodies.empty())
@@ -192,5 +202,7 @@ std::shared_ptr<Exp> Figure::eval(const std::string& prog)
         }
     }
 
-    return result.args[0];
+    std::shared_ptr<Exp> ret = result->args[0];
+    result->parent = nullptr;
+    return ret;
 }

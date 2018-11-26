@@ -16,7 +16,7 @@
 
 class Exp;
 
-class Env
+class Env : public std::enable_shared_from_this<Env>
 {
 public:
 
@@ -35,15 +35,15 @@ public:
     /// Spawn a new environment, with this as the parent environment.
     std::shared_ptr<Env> spawn();
 
+    /// Pointer to parent scope's environment. Allows efficient
+    /// creation and deletion of new scopes, as well as the
+    /// easy rebinding of symbols in a given scope.
+    std::shared_ptr<Env> parent = nullptr;
+
 private:
 
     /// Map of symbols at the current scope.
     std::map<std::string, std::shared_ptr<Exp>> symbols;
-
-    /// Pointer to parent scope's environment. Allows efficient
-    /// creation and deletion of new scopes, as well as the
-    /// easy rebinding of symbols in a given scope.
-    Env* parent = nullptr;
 };
 
 #endif // ENV_H

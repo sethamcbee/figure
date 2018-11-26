@@ -28,21 +28,21 @@ static void replace_all(
     }
 }
 
-void eval_if(std::stack<Task>& tasks)
+void eval_if(std::stack<std::shared_ptr<Task>>& tasks)
 {
-    Task& cur_task = tasks.top();
-    Task* parent = cur_task.parent;
-    auto& env = cur_task.env;
-    auto& exp = cur_task.exp;
-    auto& args = cur_task.args;
+    auto cur_task = tasks.top();
+    auto parent = cur_task->parent;
+    auto env = cur_task->env;
+    auto exp = cur_task->exp;
+    auto& args = cur_task->args;
 
     // Check if the condition needs evaluated.
     if (args.size() == 1)
     {
-        Task dep;
-        dep.parent = &cur_task;
-        dep.env = env;
-        dep.exp = exp->get_list()->link;
+        std::shared_ptr<Task> dep(new Task);
+        dep->parent = cur_task;
+        dep->env = env;
+        dep->exp = exp->get_list()->link;
         tasks.push(dep);
         return;
     }
@@ -50,30 +50,30 @@ void eval_if(std::stack<Task>& tasks)
     // Evaluate if statement.
     if (args[1]->get_bool())
     {
-        Task next;
-        next.parent = parent;
-        next.env = env;
-        next.exp = exp->get_list()->link->link;
+        std::shared_ptr<Task> next(new Task);
+        next->parent = parent;
+        next->env = env;
+        next->exp = exp->get_list()->link->link;
         tasks.pop();
         tasks.push(next);
     }
     else
     {
-        Task next;
-        next.parent = parent;
-        next.env = env;
-        next.exp = exp->get_list()->link->link->link;
+        std::shared_ptr<Task> next(new Task);
+        next->parent = parent;
+        next->env = env;
+        next->exp = exp->get_list()->link->link->link;
         tasks.pop();
         tasks.push(next);
     }
 }
 
-void eval_lambda(std::stack<Task>& tasks)
+void eval_lambda(std::stack<std::shared_ptr<Task>>& tasks)
 {
-    Task& cur_task = tasks.top();
-    Task* parent = cur_task.parent;
-    auto& env = cur_task.env;
-    auto& exp = cur_task.exp;
+    auto cur_task = tasks.top();
+    auto parent = cur_task->parent;
+    auto env = cur_task->env;
+    auto exp = cur_task->exp;
 
     Lambda* lam = new Lambda;
     lam->env = *env;
@@ -112,41 +112,44 @@ void eval_lambda(std::stack<Task>& tasks)
     auto ret = Exp::spawn();
     ret->type = Type::LAMBDA;
     ret->data = lam;
-    parent->args.push_back(ret);
+    if (parent)
+    {
+        parent->args.push_back(ret);
+    }
     tasks.pop();
 }
 
-void eval_let(std::stack<Task>& tasks)
+void eval_let(std::stack<std::shared_ptr<Task>>& tasks)
 {
-    Task& cur_task = tasks.top();
-    Task* parent = cur_task.parent;
-    auto& env = cur_task.env;
-    auto& exp = cur_task.exp;
-    auto& args = cur_task.args;
+    auto cur_task = tasks.top();
+    auto parent = cur_task->parent;
+    auto env = cur_task->env;
+    auto exp = cur_task->exp;
+    auto& args = cur_task->args;
 
     // Check if all let expressions have been evaluated.
     if (args.size() == 1)
     {
         if (exp->get_list()->link->type == Type::SYMBOL)
         {
-            Task dep;
-            dep.parent = &cur_task;
-            dep.env = env;
-            dep.exp = exp->get_list()->link->link;
+            std::shared_ptr<Task> dep(new Task);
+            dep->parent = cur_task;
+            dep->env = env;
+            dep->exp = exp->get_list()->link->link;
             tasks.push(dep);
             return;
         }
         else if (exp->get_list()->link->type == Type::LIST)
         {
             // Get bodies.
-            std::stack<Task> deps;
-            auto ind = exp->link->get_list();
+            std::stack<std::shared_ptr<Task>> deps;
+            auto ind = exp->get_list()->link->get_list();
             while (ind)
             {
-                Task dep;
-                dep.parent = &cur_task;
-                dep.env = env;
-                dep.exp = ind->get_list()->link;
+                std::shared_ptr<Task> dep(new Task);
+                dep->parent = cur_task;
+                dep->env = env;
+                dep->exp = ind->get_list()->link;
                 deps.push(dep);
                 ind = ind->link;
             }
@@ -163,85 +166,253 @@ void eval_let(std::stack<Task>& tasks)
     }
 
     // Build environment.
+    std::shared_ptr<Exp> body;
     auto new_env = env->spawn();
     size_t arg = 1;
     auto it = exp->get_list()->link;
     if (it->type == Type::LIST)
     {
+        it = it->get_list();
         while (it)
         {
             new_env->let(it->get_list()->get_string(), args[arg]);
             it = it->link;
             ++arg;
         }
+        body = exp->get_list()->link->link;
     }
     else if (it->type == Type::SYMBOL)
     {
         new_env->let(it->get_string(), args[1]);
+        body = exp->get_list()->link->link->link;
     }
 
     // Build task.
-    Task ret;
-    ret.parent = parent;
-    ret.env = new_env;
-    ret.exp = exp->get_list()->link->link;
+    std::shared_ptr<Task> ret(new Task);
+    ret->parent = parent;
+    ret->env = new_env;
+    ret->exp = body;
     tasks.pop();
     tasks.push(ret);
 }
 
-#if 0
-
-std::shared_ptr<Exp> builtin_let(Env& env, std::vector<std::shared_ptr<Exp>>& args)
+void eval_add(std::stack<std::shared_ptr<Task>>& tasks)
 {
-    // Build new environment.
-    auto new_env = env.spawn();
-    if (args[0]->type == Type::LIST)
+    auto cur_task = tasks.top();
+    auto parent = cur_task->parent;
+    auto env = cur_task->env;
+    auto exp = cur_task->exp;
+    auto& args = cur_task->args;
+
+    // Check if arguments need evaluated.
+    if (args.size() == 1)
     {
-        auto ind = args[0]->get_list();
-        while (ind)
+        std::stack<std::shared_ptr<Task>> arg_stack;
+        auto it = exp->get_list()->link;
+        while (it)
         {
-            auto var = ind->get_list();
-            new_env->let(var->get_string(), var->link->eval(env));
-            ind = ind->link;
+            std::shared_ptr<Task> dep(new Task);
+            dep->parent = cur_task;
+            dep->env = env;
+            dep->exp = it;
+            arg_stack.push(dep);
+            it = it->link;
         }
-        return args[1]->eval(*new_env);
+
+        while (!arg_stack.empty())
+        {
+            tasks.push(arg_stack.top());
+            arg_stack.pop();
+        }
+
+        return;
     }
-    else if (args[0]->type == Type::SYMBOL)
+
+    // Calculate sum.
+    Number_Type sum = 0;
+    size_t arg_count = args.size();
+    for (size_t i = 1; i < arg_count; ++i)
     {
-        new_env->let(args[0]->get_string(), args[1]->eval(env));
-        return args[2]->eval(*new_env);
+        sum += args[i]->get_number();
     }
-    else
+
+    // Build and return expression.
+    auto ret = Exp::spawn();
+    ret->type = Type::NUMBER;
+    ret->data = new Number_Type;
+    Number_Type* p = (Number_Type*)ret->data;
+    *p = sum;
+    tasks.pop();
+
+    if (parent)
     {
-        std::cerr << "Poorly formed let expression.\n";
-        std::exit(1);
+        parent->args.push_back(ret);
     }
 }
 
-std::shared_ptr<Exp> builtin_if(Env& env, std::vector<std::shared_ptr<Exp>>& args)
+void eval_sub(std::stack<std::shared_ptr<Task>>& tasks)
 {
-    // Evaluate condition.
-    bool b;
+    auto cur_task = tasks.top();
+    auto parent = cur_task->parent;
+    auto env = cur_task->env;
+    auto exp = cur_task->exp;
+    auto& args = cur_task->args;
 
-    auto cond = args[0]->eval(env);
-    if (cond->type == Type::BOOLEAN)
+    // Check if arguments need evaluated.
+    if (args.size() == 1)
     {
-        b = cond->get_bool();
-    }
-    else
-    {
-        b = true;
+        std::stack<std::shared_ptr<Task>> arg_stack;
+        auto it = exp->get_list()->link;
+        while (it)
+        {
+            std::shared_ptr<Task> dep(new Task);
+            dep->parent = cur_task;
+            dep->env = env;
+            dep->exp = it;
+            arg_stack.push(dep);
+            it = it->link;
+        }
+
+        while (!arg_stack.empty())
+        {
+            tasks.push(arg_stack.top());
+            arg_stack.pop();
+        }
+
+        return;
     }
 
-    if (b)
+    // Calculate difference.
+    Number_Type sum = args[1]->get_number();
+    size_t arg_count = args.size();
+    for (size_t i = 2; i < arg_count; ++i)
     {
-        return args[1]->eval(env);
+        sum -= args[i]->get_number();
     }
-    else
+
+    // Build and return expression.
+    auto ret = Exp::spawn();
+    ret->type = Type::NUMBER;
+    ret->data = new Number_Type;
+    Number_Type* p = (Number_Type*)ret->data;
+    *p = sum;
+    tasks.pop();
+
+    if (parent)
     {
-        return args[2]->eval(env);
+        parent->args.push_back(ret);
     }
 }
+
+void eval_mul(std::stack<std::shared_ptr<Task>>& tasks)
+{
+    auto cur_task = tasks.top();
+    auto parent = cur_task->parent;
+    auto env = cur_task->env;
+    auto exp = cur_task->exp;
+    auto& args = cur_task->args;
+
+    // Check if arguments need evaluated.
+    if (args.size() == 1)
+    {
+        std::stack<std::shared_ptr<Task>> arg_stack;
+        auto it = exp->get_list()->link;
+        while (it)
+        {
+            std::shared_ptr<Task> dep(new Task);
+            dep->parent = cur_task;
+            dep->env = env;
+            dep->exp = it;
+            arg_stack.push(dep);
+            it = it->link;
+        }
+
+        while (!arg_stack.empty())
+        {
+            tasks.push(arg_stack.top());
+            arg_stack.pop();
+        }
+
+        return;
+    }
+
+    // Calculate result.
+    Number_Type n = args[1]->get_number();
+    size_t arg_count = args.size();
+    for (size_t i = 2; i < arg_count; ++i)
+    {
+        n *= args[i]->get_number();
+    }
+
+    // Build and return expression.
+    auto ret = Exp::spawn();
+    ret->type = Type::NUMBER;
+    ret->data = new Number_Type;
+    Number_Type* p = (Number_Type*)ret->data;
+    *p = n;
+    tasks.pop();
+
+    if (parent)
+    {
+        parent->args.push_back(ret);
+    }
+}
+
+void eval_div(std::stack<std::shared_ptr<Task>>& tasks)
+{
+    auto cur_task = tasks.top();
+    auto parent = cur_task->parent;
+    auto env = cur_task->env;
+    auto exp = cur_task->exp;
+    auto& args = cur_task->args;
+
+    // Check if arguments need evaluated.
+    if (args.size() == 1)
+    {
+        std::stack<std::shared_ptr<Task>> arg_stack;
+        auto it = exp->get_list()->link;
+        while (it)
+        {
+            std::shared_ptr<Task> dep(new Task);
+            dep->parent = cur_task;
+            dep->env = env;
+            dep->exp = it;
+            arg_stack.push(dep);
+            it = it->link;
+        }
+
+        while (!arg_stack.empty())
+        {
+            tasks.push(arg_stack.top());
+            arg_stack.pop();
+        }
+
+        return;
+    }
+
+    // Calculate result.
+    Number_Type n = args[1]->get_number();
+    size_t arg_count = args.size();
+    for (size_t i = 2; i < arg_count; ++i)
+    {
+        n /= args[i]->get_number();
+    }
+
+    // Build and return expression.
+    auto ret = Exp::spawn();
+    ret->type = Type::NUMBER;
+    ret->data = new Number_Type;
+    Number_Type* p = (Number_Type*)ret->data;
+    *p = n;
+    tasks.pop();
+
+    if (parent)
+    {
+        parent->args.push_back(ret);
+    }
+}
+
+#if 0
 
 std::shared_ptr<Exp> builtin_display(Env& env, std::vector<std::shared_ptr<Exp>>& args)
 {

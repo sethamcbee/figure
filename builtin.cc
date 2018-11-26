@@ -117,7 +117,10 @@ void eval_and(std::stack<std::shared_ptr<Task>>& tasks)
     }
 
     // Pass result.
-    parent->args.push_back(ret);
+    if (parent)
+    {
+        parent->args.push_back(ret);
+    }
     tasks.pop();
 }
 
@@ -170,7 +173,10 @@ void eval_or(std::stack<std::shared_ptr<Task>>& tasks)
     }
 
     // Pass result.
-    parent->args.push_back(ret);
+    if (parent)
+    {
+        parent->args.push_back(ret);
+    }
     tasks.pop();
 }
 
@@ -439,7 +445,10 @@ void eval_begin(std::stack<std::shared_ptr<Task>>& tasks)
 
     // Return result of last expression.
     auto ret = args[args.size() - 1];
-    parent->args.push_back(ret);
+    if (parent)
+    {
+        parent->args.push_back(ret);
+    }
     tasks.pop();
 }
 

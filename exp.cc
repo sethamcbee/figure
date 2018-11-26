@@ -322,8 +322,14 @@ void Exp::print() const
     }
     else if (type == Type::BOOLEAN)
     {
-        bool* p = (bool*)data;
-        std::cout << *p;
+        if (get_bool())
+        {
+            std::cout << "#t";
+        }
+        else
+        {
+            std::cout << "#f";
+        }
     }
     else if (type == Type::SYMBOL)
     {
@@ -333,6 +339,13 @@ void Exp::print() const
     else if (type == Type::LIST)
     {
         std::cout << '(';
+
+        // Check for empty list.
+        if (data == nullptr)
+        {
+            std::cout << ')';
+            return;
+        }
 
         // Print first element.
         auto p = *(std::shared_ptr<Exp>*)data;

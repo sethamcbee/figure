@@ -27,6 +27,7 @@ std::shared_ptr<Exp> Figure::eval(const std::string& prog)
     exp_false->data = new bool(false);
     init_env->let("false", exp_false);
     init_env->builtin("if", eval_if);
+    init_env->builtin("and", eval_and);
     init_env->builtin("lambda", eval_lambda);
     init_env->builtin("let", eval_let);
     init_env->builtin("letrec", eval_letrec);

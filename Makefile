@@ -8,7 +8,7 @@ PROFILE ?= 0
 
 # Check if we are debugging.
 ifeq ($(RELEASE), 0)
-	CXXFLAGS += -fverbose-asm -ggdb -Og
+	CXXFLAGS += -fverbose-asm -ggdb -O0
 else
 	CXXFLAGS += -O2 -DNDEBUG
 endif

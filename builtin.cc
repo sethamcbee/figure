@@ -68,6 +68,60 @@ void eval_if(std::stack<std::shared_ptr<Task>>& tasks)
     }
 }
 
+
+void eval_and(std::stack<std::shared_ptr<Task>>& tasks)
+{
+    auto cur_task = tasks.top();
+    auto parent = cur_task->parent;
+    auto env = cur_task->env;
+    auto exp = cur_task->exp;
+    auto& args = cur_task->args;
+
+    // Check if arguments need evaluated.
+    if (args.size() == 1)
+    {
+        std::stack<std::shared_ptr<Task>> arg_stack;
+        auto it = exp->get_list()->link;
+        while (it)
+        {
+            std::shared_ptr<Task> next(new Task);
+            next->parent = cur_task;
+            next->env = env;
+            next->exp = it;
+            arg_stack.push(next);
+            it = it->link;
+        }
+
+        while (!arg_stack.empty())
+        {
+            tasks.push(arg_stack.top());
+            arg_stack.pop();
+        }
+
+        return;
+    }
+
+    // This implementation is not compliant as it evaluates all
+    // arguments beforehand.
+    auto ret = args[1];
+    size_t count = args.size();
+    for (size_t i = 1; i < count; ++i)
+    {
+        ret = args[i];
+        if (args[i]->type == Type::BOOLEAN)
+        {
+            if (args[i]->get_bool() == false)
+            {
+                break;
+            }
+        }
+    }
+
+    // Pass result.
+    parent->args.push_back(ret);
+    tasks.pop();
+}
+
 void eval_lambda(std::stack<std::shared_ptr<Task>>& tasks)
 {
     auto cur_task = tasks.top();

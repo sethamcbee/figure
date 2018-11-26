@@ -250,16 +250,28 @@ void eval_letrec(std::stack<std::shared_ptr<Task>>& tasks)
     if (it->type == Type::LIST)
     {
         it = it->get_list();
+
+        // Build environment with recursive bindings.
+        while (it)
+        {
+            if (args[arg]->type == Type::LAMBDA)
+            {
+                new_env->let(it->get_list()->get_string(), args[arg]);
+            }
+            it = it->link;
+            ++arg;
+        }
+
+        it = exp->get_list()->link->get_list();
+        arg = 1;
         while (it)
         {
             // Add recursive bindings.
             if (args[arg]->type == Type::LAMBDA)
             {
                 auto& lam = args[arg]->get_lambda();
-                lam.env->let(it->get_string(), args[arg]);
+                lam.env = new_env;
             }
-
-            new_env->let(it->get_list()->get_string(), args[arg]);
             it = it->link;
             ++arg;
         }
@@ -285,6 +297,44 @@ void eval_letrec(std::stack<std::shared_ptr<Task>>& tasks)
     ret->exp = body;
     tasks.pop();
     tasks.push(ret);
+}
+
+void eval_begin(std::stack<std::shared_ptr<Task>>& tasks)
+{
+    auto cur_task = tasks.top();
+    auto parent = cur_task->parent;
+    auto env = cur_task->env;
+    auto exp = cur_task->exp;
+    auto& args = cur_task->args;
+
+    // Check if arguments need evaluated.
+    if (args.size() == 1)
+    {
+        std::stack<std::shared_ptr<Task>> arg_stack;
+        auto it = exp->get_list()->link;
+        while (it)
+        {
+            std::shared_ptr<Task> dep(new Task);
+            dep->parent = cur_task;
+            dep->env = env;
+            dep->exp = it;
+            arg_stack.push(dep);
+            it = it->link;
+        }
+
+        while (!arg_stack.empty())
+        {
+            tasks.push(arg_stack.top());
+            arg_stack.pop();
+        }
+
+        return;
+    }
+
+    // Return result of last expression.
+    auto ret = args[args.size() - 1];
+    parent->args.push_back(ret);
+    tasks.pop();
 }
 
 void eval_add(std::stack<std::shared_ptr<Task>>& tasks)
@@ -588,7 +638,14 @@ void eval_display(std::stack<std::shared_ptr<Task>>& tasks)
         }
         else if (args[1]->type == Type::BOOLEAN)
         {
-            std::cout << args[1]->get_bool();
+            if (args[1]->get_bool())
+            {
+                std::cout << "#t";
+            }
+            else
+            {
+                std::cout << "#f";
+            }
         }
         else if (args[1]->type == Type::STRING)
         {

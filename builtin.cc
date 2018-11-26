@@ -412,6 +412,65 @@ void eval_div(std::stack<std::shared_ptr<Task>>& tasks)
     }
 }
 
+void eval_numeq(std::stack<std::shared_ptr<Task>>& tasks)
+{
+    auto cur_task = tasks.top();
+    auto parent = cur_task->parent;
+    auto env = cur_task->env;
+    auto exp = cur_task->exp;
+    auto& args = cur_task->args;
+
+    // Check if arguments need evaluated.
+    if (args.size() == 1)
+    {
+        std::stack<std::shared_ptr<Task>> arg_stack;
+        auto it = exp->get_list()->link;
+        while (it)
+        {
+            std::shared_ptr<Task> dep(new Task);
+            dep->parent = cur_task;
+            dep->env = env;
+            dep->exp = it;
+            arg_stack.push(dep);
+            it = it->link;
+        }
+
+        while (!arg_stack.empty())
+        {
+            tasks.push(arg_stack.top());
+            arg_stack.pop();
+        }
+
+        return;
+    }
+
+    // Calculate result.
+    bool equal = true;
+    Number_Type n = args[1]->get_number();
+    size_t arg_count = args.size();
+    for (size_t i = 2; i < arg_count; ++i)
+    {
+        if (n != args[i]->get_number())
+        {
+            equal = false;
+            break;
+        }
+    }
+
+    // Build and return expression.
+    auto ret = Exp::spawn();
+    ret->type = Type::BOOLEAN;
+    ret->data = new bool;
+    bool* p = (bool*)ret->data;
+    *p = equal;
+    tasks.pop();
+
+    if (parent)
+    {
+        parent->args.push_back(ret);
+    }
+}
+
 #if 0
 
 std::shared_ptr<Exp> builtin_display(Env& env, std::vector<std::shared_ptr<Exp>>& args)

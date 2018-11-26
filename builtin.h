@@ -22,6 +22,7 @@ void eval_add(std::stack<std::shared_ptr<Task>>& tasks);
 void eval_sub(std::stack<std::shared_ptr<Task>>& tasks);
 void eval_mul(std::stack<std::shared_ptr<Task>>& tasks);
 void eval_div(std::stack<std::shared_ptr<Task>>& tasks);
+void eval_numeq(std::stack<std::shared_ptr<Task>>& tasks);
 
 std::shared_ptr<Exp> builtin_lambda(Env& env, std::vector<std::shared_ptr<Exp>>& args);
 std::shared_ptr<Exp> builtin_let(Env& env, std::vector<std::shared_ptr<Exp>>& args);

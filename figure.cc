@@ -33,6 +33,7 @@ std::shared_ptr<Exp> Figure::eval(const std::string& prog)
     init_env->builtin("-", eval_sub);
     init_env->builtin("*", eval_mul);
     init_env->builtin("/", eval_div);
+    init_env->builtin("=", eval_numeq);
 
     // Parse input.
     std::shared_ptr<Exp> root = Exp::spawn();
@@ -55,7 +56,7 @@ std::shared_ptr<Exp> Figure::eval(const std::string& prog)
         std::shared_ptr<Exp> exp = cur_task->exp;
         std::vector<std::shared_ptr<Exp>>& args = cur_task->args;
 
-#if 1
+#if 0
         exp->print();
         std::cout << std::endl;
 #endif

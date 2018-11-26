@@ -767,9 +767,17 @@ void eval_display(std::stack<std::shared_ptr<Task>>& tasks)
                 std::cout << edit;
             }
         }
+        else
+        {
+            // Fallback.
+            args[1]->print();
+        }
 
         // Return void.
-        parent->args.push_back(Exp::spawn());
+        if (parent)
+        {
+            parent->args.push_back(Exp::spawn());
+        }
 
         tasks.pop();
         return;
@@ -799,7 +807,10 @@ void eval_write(std::stack<std::shared_ptr<Task>>& tasks)
         args[1]->print();
 
         // Return void.
-        parent->args.push_back(Exp::spawn());
+        if (parent)
+        {
+            parent->args.push_back(Exp::spawn());
+        }
 
         tasks.pop();
         return;

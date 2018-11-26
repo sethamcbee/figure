@@ -1,6 +1,6 @@
 # Build settings.
 CXX ?= g++
-CXXFLAGS ?= -std=c++11 -march=native -Wall -flto
+CXXFLAGS ?= -std=c++11 -march=native -Wall
 CXXFLAGS += $(INCLUDE_SCRIPT)
 LD_INPUT = -lstdc++fs
 RELEASE ?= 0
@@ -10,7 +10,7 @@ PROFILE ?= 0
 ifeq ($(RELEASE), 0)
 	CXXFLAGS += -fverbose-asm -ggdb -O0
 else
-	CXXFLAGS += -O2 -DNDEBUG
+	CXXFLAGS += -O2 -DNDEBUG -flto
 endif
 
 # Check if we are profiling.

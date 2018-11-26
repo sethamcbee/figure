@@ -1,6 +1,6 @@
 # Build settings.
 CXX ?= g++
-CXXFLAGS ?= -std=c++11 -march=native -Wall
+CXXFLAGS ?= -std=c++11 -march=native -Wall -flto
 CXXFLAGS += $(INCLUDE_SCRIPT)
 LD_INPUT = -lstdc++fs
 RELEASE ?= 0

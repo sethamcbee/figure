@@ -612,3 +612,33 @@ void eval_display(std::stack<std::shared_ptr<Task>>& tasks)
         return;
     }
 }
+
+void eval_write(std::stack<std::shared_ptr<Task>>& tasks)
+{
+    auto cur_task = tasks.top();
+    auto parent = cur_task->parent;
+    auto env = cur_task->env;
+    auto exp = cur_task->exp;
+    auto& args = cur_task->args;
+
+    // Check if parameter needs evaluated.
+    if (args.size() == 1)
+    {
+        std::shared_ptr<Task> dep(new Task);
+        dep->parent = cur_task;
+        dep->env = env;
+        dep->exp = exp->get_list()->link;
+        tasks.push(dep);
+        return;
+    }
+    else
+    {
+        args[1]->print();
+
+        // Return void.
+        parent->args.push_back(Exp::spawn());
+
+        tasks.pop();
+        return;
+    }
+}

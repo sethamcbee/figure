@@ -25,5 +25,6 @@ void eval_mul(std::stack<std::shared_ptr<Task>>& tasks);
 void eval_div(std::stack<std::shared_ptr<Task>>& tasks);
 void eval_numeq(std::stack<std::shared_ptr<Task>>& tasks);
 void eval_display(std::stack<std::shared_ptr<Task>>& tasks);
+void eval_write(std::stack<std::shared_ptr<Task>>& tasks);
 
 #endif // BUILTIN_H

@@ -76,7 +76,7 @@ void eval_lambda(std::stack<std::shared_ptr<Task>>& tasks)
     auto exp = cur_task->exp;
 
     Lambda* lam = new Lambda;
-    lam->env = *env;
+    lam->env = env;
 
     // Get parameters.
     auto lam_args = exp->get_list()->link;
@@ -183,6 +183,97 @@ void eval_let(std::stack<std::shared_ptr<Task>>& tasks)
     }
     else if (it->type == Type::SYMBOL)
     {
+        new_env->let(it->get_string(), args[1]);
+        body = exp->get_list()->link->link->link;
+    }
+
+    // Build task.
+    std::shared_ptr<Task> ret(new Task);
+    ret->parent = parent;
+    ret->env = new_env;
+    ret->exp = body;
+    tasks.pop();
+    tasks.push(ret);
+}
+
+void eval_letrec(std::stack<std::shared_ptr<Task>>& tasks)
+{
+    auto cur_task = tasks.top();
+    auto parent = cur_task->parent;
+    auto env = cur_task->env;
+    auto exp = cur_task->exp;
+    auto& args = cur_task->args;
+
+    // Check if all let expressions have been evaluated.
+    if (args.size() == 1)
+    {
+        if (exp->get_list()->link->type == Type::SYMBOL)
+        {
+            std::shared_ptr<Task> dep(new Task);
+            dep->parent = cur_task;
+            dep->env = env;
+            dep->exp = exp->get_list()->link->link;
+            tasks.push(dep);
+            return;
+        }
+        else if (exp->get_list()->link->type == Type::LIST)
+        {
+            // Get bodies.
+            std::stack<std::shared_ptr<Task>> deps;
+            auto ind = exp->get_list()->link->get_list();
+            while (ind)
+            {
+                std::shared_ptr<Task> dep(new Task);
+                dep->parent = cur_task;
+                dep->env = env;
+                dep->exp = ind->get_list()->link;
+                deps.push(dep);
+                ind = ind->link;
+            }
+
+            // Add to evaluation stack in reverse order.
+            while (!deps.empty())
+            {
+                tasks.push(deps.top());
+                deps.pop();
+            }
+
+            return;
+        }
+    }
+
+    // Build environment.
+    std::shared_ptr<Exp> body;
+    auto new_env = env->spawn();
+    size_t arg = 1;
+    auto it = exp->get_list()->link;
+    if (it->type == Type::LIST)
+    {
+        it = it->get_list();
+        while (it)
+        {
+            // Add recursive bindings.
+            if (args[arg]->type == Type::LAMBDA)
+            {
+                auto& lam = args[arg]->get_lambda();
+                lam.env->let(it->get_string(), args[arg]);
+            }
+
+            new_env->let(it->get_list()->get_string(), args[arg]);
+            it = it->link;
+            ++arg;
+        }
+        body = exp->get_list()->link->link;
+    }
+    else if (it->type == Type::SYMBOL)
+    {
+        // Add recursive bindings.
+        if (args[1]->type == Type::LAMBDA)
+        {
+            auto& lam = args[1]->get_lambda();
+            lam.env->let(it->get_string(), args[1]);
+        }
+
         new_env->let(it->get_string(), args[1]);
         body = exp->get_list()->link->link->link;
     }

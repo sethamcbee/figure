@@ -18,6 +18,7 @@ class Task;
 void eval_if(std::stack<std::shared_ptr<Task>>& tasks);
 void eval_lambda(std::stack<std::shared_ptr<Task>>& tasks);
 void eval_let(std::stack<std::shared_ptr<Task>>& tasks);
+void eval_letrec(std::stack<std::shared_ptr<Task>>& tasks);
 void eval_add(std::stack<std::shared_ptr<Task>>& tasks);
 void eval_sub(std::stack<std::shared_ptr<Task>>& tasks);
 void eval_mul(std::stack<std::shared_ptr<Task>>& tasks);

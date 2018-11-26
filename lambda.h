@@ -11,7 +11,7 @@ class Lambda
 public:
 
     std::vector<std::string> args;
-    Env env;
+    std::shared_ptr<Env> env;
     std::vector<std::shared_ptr<Exp>> bodies;
 };
 

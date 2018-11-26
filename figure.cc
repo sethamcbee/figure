@@ -29,6 +29,7 @@ std::shared_ptr<Exp> Figure::eval(const std::string& prog)
     init_env->builtin("if", eval_if);
     init_env->builtin("lambda", eval_lambda);
     init_env->builtin("let", eval_let);
+    init_env->builtin("letrec", eval_letrec);
     init_env->builtin("+", eval_add);
     init_env->builtin("-", eval_sub);
     init_env->builtin("*", eval_mul);
@@ -70,7 +71,10 @@ std::shared_ptr<Exp> Figure::eval(const std::string& prog)
         case Type::NATIVE_FUNCTION:
         case Type::LAMBDA:
             // Atoms need no evaluation.
-            parent->args.push_back(exp);
+            if (parent)
+            {
+                parent->args.push_back(exp);
+            }
             tasks.pop();
             break;
 
@@ -146,7 +150,7 @@ std::shared_ptr<Exp> Figure::eval(const std::string& prog)
 
                 // Substitute evaluated arguments and build closure.
                 auto& lam = args[0]->get_lambda();
-                auto new_env = env->spawn();
+                auto new_env = lam.env->spawn();
                 size_t arg_count = lam.args.size();
                 for (size_t i = 0; i < arg_count; ++i)
                 {
@@ -203,7 +207,8 @@ std::shared_ptr<Exp> Figure::eval(const std::string& prog)
         }
     }
 
+    // Get return value before cleanup.
     std::shared_ptr<Exp> ret = result->args[0];
-    result->parent = nullptr;
+
     return ret;
 }

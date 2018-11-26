@@ -24,14 +24,6 @@ void eval_sub(std::stack<std::shared_ptr<Task>>& tasks);
 void eval_mul(std::stack<std::shared_ptr<Task>>& tasks);
 void eval_div(std::stack<std::shared_ptr<Task>>& tasks);
 void eval_numeq(std::stack<std::shared_ptr<Task>>& tasks);
-
-std::shared_ptr<Exp> builtin_lambda(Env& env, std::vector<std::shared_ptr<Exp>>& args);
-std::shared_ptr<Exp> builtin_let(Env& env, std::vector<std::shared_ptr<Exp>>& args);
-std::shared_ptr<Exp> builtin_if(Env& env, std::vector<std::shared_ptr<Exp>>& args);
-std::shared_ptr<Exp> builtin_display(Env& env, std::vector<std::shared_ptr<Exp>>& args);
-std::shared_ptr<Exp> builtin_add(Env& env, std::vector<std::shared_ptr<Exp>>& args);
-std::shared_ptr<Exp> builtin_sub(Env& env, std::vector<std::shared_ptr<Exp>>& args);
-std::shared_ptr<Exp> builtin_mul(Env& env, std::vector<std::shared_ptr<Exp>>& args);
-std::shared_ptr<Exp> builtin_div(Env& env, std::vector<std::shared_ptr<Exp>>& args);
+void eval_display(std::stack<std::shared_ptr<Task>>& tasks);
 
 #endif // BUILTIN_H

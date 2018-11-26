@@ -35,6 +35,7 @@ std::shared_ptr<Exp> Figure::eval(const std::string& prog)
     init_env->builtin("*", eval_mul);
     init_env->builtin("/", eval_div);
     init_env->builtin("=", eval_numeq);
+    init_env->builtin("display", eval_display);
 
     // Parse input.
     std::shared_ptr<Exp> root = Exp::spawn();

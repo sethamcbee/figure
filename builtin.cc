@@ -562,108 +562,53 @@ void eval_numeq(std::stack<std::shared_ptr<Task>>& tasks)
     }
 }
 
-#if 0
-
-std::shared_ptr<Exp> builtin_display(Env& env, std::vector<std::shared_ptr<Exp>>& args)
+void eval_display(std::stack<std::shared_ptr<Task>>& tasks)
 {
-    auto val = args[0]->eval(env);
-    if (val->type == Type::NUMBER)
+    auto cur_task = tasks.top();
+    auto parent = cur_task->parent;
+    auto env = cur_task->env;
+    auto exp = cur_task->exp;
+    auto& args = cur_task->args;
+
+    // Check if parameter needs evaluated.
+    if (args.size() == 1)
     {
-        std::cout << val->get_number();
+        std::shared_ptr<Task> dep(new Task);
+        dep->parent = cur_task;
+        dep->env = env;
+        dep->exp = exp->get_list()->link;
+        tasks.push(dep);
+        return;
     }
-    else if (val->type == Type::BOOLEAN)
+    else
     {
-        std::cout << val->get_bool();
-    }
-    else if (val->type == Type::STRING)
-    {
-        // Escape newlines.
-        if (val->get_string().find("\\n") == std::string::npos)
+        if (args[1]->type == Type::NUMBER)
         {
-            std::cout << val->get_string();
+            std::cout << args[1]->get_number();
         }
-        else
+        else if (args[1]->type == Type::BOOLEAN)
         {
-            std::string edit = val->get_string();
-            replace_all(edit, "\\n", "\n");
-            std::cout << edit;
+            std::cout << args[1]->get_bool();
         }
+        else if (args[1]->type == Type::STRING)
+        {
+            // Escape newline.
+            if (args[1]->get_string().find("\\n") == std::string::npos)
+            {
+                std::cout << args[1]->get_string();
+            }
+            else
+            {
+                std::string edit = args[1]->get_string();
+                replace_all(edit, "\\n", "\n");
+                std::cout << edit;
+            }
+        }
+
+        // Return void.
+        parent->args.push_back(Exp::spawn());
+
+        tasks.pop();
+        return;
     }
-
-    // Return evaluated expression.
-    return val;
 }
-
-std::shared_ptr<Exp> builtin_add(Env& env, std::vector<std::shared_ptr<Exp>>& args)
-{
-    Number_Type val = args[0]->eval(env)->get_number();
-    size_t count = args.size();
-    for (size_t i = 1; i < count; ++i)
-    {
-        val += args[i]->eval(env)->get_number();
-    }
-
-    auto ret = Exp::spawn();
-    ret->type = Type::NUMBER;
-    ret->data = new Number_Type;
-    Number_Type* p = (Number_Type*)ret->data;
-    *p = val;
-
-    return ret;
-}
-
-std::shared_ptr<Exp> builtin_sub(Env& env, std::vector<std::shared_ptr<Exp>>& args)
-{
-    Number_Type val = args[0]->eval(env)->get_number();
-    size_t count = args.size();
-    for (size_t i = 1; i < count; ++i)
-    {
-        val -= args[i]->eval(env)->get_number();
-    }
-
-    auto ret = Exp::spawn();
-    ret->type = Type::NUMBER;
-    ret->data = new Number_Type;
-    Number_Type* p = (Number_Type*)ret->data;
-    *p = val;
-
-    return ret;
-}
-
-std::shared_ptr<Exp> builtin_mul(Env& env, std::vector<std::shared_ptr<Exp>>& args)
-{
-    Number_Type val = args[0]->eval(env)->get_number();
-    size_t count = args.size();
-    for (size_t i = 1; i < count; ++i)
-    {
-        val *= args[i]->eval(env)->get_number();
-    }
-
-    auto ret = Exp::spawn();
-    ret->type = Type::NUMBER;
-    ret->data = new Number_Type;
-    Number_Type* p = (Number_Type*)ret->data;
-    *p = val;
-
-    return ret;
-}
-
-std::shared_ptr<Exp> builtin_div(Env& env, std::vector<std::shared_ptr<Exp>>& args)
-{
-    Number_Type val = args[0]->eval(env)->get_number();
-    size_t count = args.size();
-    for (size_t i = 1; i < count; ++i)
-    {
-        val /= args[i]->eval(env)->get_number();
-    }
-
-    auto ret = Exp::spawn();
-    ret->type = Type::NUMBER;
-    ret->data = new Number_Type;
-    Number_Type* p = (Number_Type*)ret->data;
-    *p = val;
-
-    return ret;
-}
-
-#endif

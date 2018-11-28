@@ -14,7 +14,6 @@
 void special_if(std::stack<std::shared_ptr<Task>>& tasks)
 {
     auto cur_task = tasks.top();
-    auto parent = cur_task->parent;
     auto env = cur_task->env;
     auto exp = cur_task->exp->get_list();
     auto& args = cur_task->args;
@@ -31,7 +30,6 @@ void special_if(std::stack<std::shared_ptr<Task>>& tasks)
     if (args[0]->self_eval() == false)
     {
         std::shared_ptr<Task> dep(new Task);
-        dep->parent = cur_task->parent;
         dep->env = env;
         dep->exp = args[0];
         dep->result = &args[0];

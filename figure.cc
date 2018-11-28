@@ -124,7 +124,6 @@ std::shared_ptr<Exp> Figure::eval(
     while (!tasks.empty())
     {
         auto cur_task = tasks.top();
-        auto parent = cur_task->parent;
         auto env = cur_task->env;
         auto exp = cur_task->exp;
         auto& alias = cur_task->alias;
@@ -204,6 +203,14 @@ std::shared_ptr<Exp> Figure::eval(
                         auto fn = first->get_special_form();
                         fn(tasks);
                     }
+                    // Check if this is a lambda evaluation.
+                    else if (first->type == Type::LAMBDA)
+                    {
+                    }
+                    // Check if this is a builtin function.
+                    else if (first->type == Type::NATIVE_FUNCTION)
+                    {
+                    }
                     // Treat as data.
                     else
                     {
@@ -221,7 +228,6 @@ std::shared_ptr<Exp> Figure::eval(
                     if (args.size() == 0)
                     {
                         std::shared_ptr<Task> dep(new Task);
-                        dep->parent = cur_task;
                         dep->env = env;
                         dep->exp = first;
                         dep->result = &alias;

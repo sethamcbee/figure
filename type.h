@@ -34,9 +34,6 @@ class Task
 {
 public:
 
-    /// Parent task.
-    std::shared_ptr<Task> parent = nullptr;
-
     /// Current execution environment.
     std::shared_ptr<Env> env = nullptr;
 

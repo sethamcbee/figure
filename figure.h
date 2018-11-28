@@ -15,7 +15,11 @@ class Figure
 public:
 
     // Evaluate a program.
-    static std::shared_ptr<Exp> eval(const std::string& prog);
+    static std::shared_ptr<Exp> run(const std::string& prog);
+
+    // Evaluate a single top-level expression.
+    static std::shared_ptr<Exp> eval(
+        std::shared_ptr<Env> env, std::shared_ptr<Exp> exp);
 };
 
 #endif // FIGURE_H

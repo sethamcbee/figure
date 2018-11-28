@@ -32,6 +32,9 @@ public:
     /// Bind a new native function.
     void builtin(const std::string& name, const Native_Function& fn);
 
+    /// Bind a new special form.
+    void special_form(const std::string& name, const Special_Form& fn);
+
     /// Spawn a new environment, with this as the parent environment.
     std::shared_ptr<Env> spawn();
 

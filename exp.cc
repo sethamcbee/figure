@@ -291,6 +291,11 @@ Exp::~Exp()
         Native_Function* p = (Native_Function*)data;
         delete p;
     }
+    else if (type == Type::SPECIAL_FORM)
+    {
+        auto p = (Special_Form*)data;
+        delete p;
+    }
     else if (type == Type::LAMBDA)
     {
         Lambda* p = (Lambda*)data;
@@ -367,6 +372,19 @@ void Exp::print() const
     }
 }
 
+bool Exp::self_eval() const
+{
+    if (type == Type::SYMBOL ||
+        type == Type::LIST)
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
 const std::string& Exp::get_string() const
 {
     if (type == Type::STRING || type == Type::SYMBOL)
@@ -419,6 +437,20 @@ Native_Function& Exp::get_native_function() const
     else
     {
         std::cerr << "Error: Invalid attempt to treat object as a native function.\n";
+        std::exit(1);
+    }
+}
+
+Special_Form& Exp::get_special_form() const
+{
+    if (type == Type::SPECIAL_FORM)
+    {
+        Special_Form* p = (Special_Form*)data;
+        return *p;
+    }
+    else
+    {
+        std::cerr << "Error: Invalid attempt to treat object as a special form.\n";
         std::exit(1);
     }
 }

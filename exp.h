@@ -42,6 +42,9 @@ public:
     /// Print the contents of an expression.
     void print() const;
 
+    /// Return whether this expression is fully evaluated.
+    bool self_eval() const;
+
     /// Get a string from this expression.
     const std::string& get_string() const;
 
@@ -53,6 +56,9 @@ public:
 
     /// Get a native function from this expression.
     Native_Function& get_native_function() const;
+
+    /// Get a special form evaluator from this expression.
+    Special_Form& get_special_form() const;
 
     /// Get a lambda from this expression.
     Lambda& get_lambda() const;

@@ -41,8 +41,8 @@ int main(int argc, char** argv)
     // Print input file.
     std::cout << input.str() << std::endl;
 
-    // Evaluate expression and print result.
-    std::shared_ptr<Exp> result = Figure::eval(input.str());
+    // Run program and print result.
+    std::shared_ptr<Exp> result = Figure::run(input.str());
     std::cout << std::endl;
     result->print();
     std::cout << std::endl;

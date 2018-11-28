@@ -7,6 +7,7 @@
 
 #include "env.h"
 #include "exp.h"
+#include "type.h"
 
 bool Env::is_bound(const std::string& name)
 {
@@ -56,6 +57,15 @@ void Env::builtin(const std::string& name, const Native_Function& fn)
     Native_Function* p = new Native_Function(fn);
     std::shared_ptr<Exp> exp = Exp::spawn();
     exp->type = Type::NATIVE_FUNCTION;
+    exp->data = (void*)p;
+    let(name, exp);
+}
+
+void Env::special_form(const std::string& name, const Special_Form& fn)
+{
+    Special_Form* p = new Special_Form(fn);
+    std::shared_ptr<Exp> exp = Exp::spawn();
+    exp->type = Type::SPECIAL_FORM;
     exp->data = (void*)p;
     let(name, exp);
 }

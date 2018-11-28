@@ -12,9 +12,10 @@
 #include "exp.h"
 #include "figure.h"
 #include "lambda.h"
+#include "special_form.h"
 #include "type.h"
 
-std::shared_ptr<Exp> Figure::eval(const std::string& prog)
+std::shared_ptr<Exp> Figure::run(const std::string& prog)
 {
     // Build initial environment.
     std::shared_ptr<Env> init_env(new Env);
@@ -26,7 +27,9 @@ std::shared_ptr<Exp> Figure::eval(const std::string& prog)
     exp_false->type = Type::BOOLEAN;
     exp_false->data = new bool(false);
     init_env->let("false", exp_false);
-    init_env->builtin("if", eval_if);
+    //init_env->builtin("if", eval_if);
+    init_env->special_form("if", special_if);
+#if 0
     init_env->builtin("and", eval_and);
     init_env->builtin("or", eval_or);
     init_env->builtin("lambda", eval_lambda);
@@ -40,27 +43,93 @@ std::shared_ptr<Exp> Figure::eval(const std::string& prog)
     init_env->builtin("=", eval_numeq);
     init_env->builtin("display", eval_display);
     init_env->builtin("write", eval_write);
+#endif
 
     // Parse input.
+    size_t pos = next_token(prog, 0, prog.length());
+    size_t end = skip_token(prog, pos, prog.length());
+
+    // Read first top level definition.
     std::shared_ptr<Exp> root = Exp::spawn();
-    root->parse(prog, 0, prog.length());
+    root->parse(prog, pos, end);
+
+    // Read additional expressions.
+    std::shared_ptr<Exp> next = root;
+    while (next_token(prog, end - 1, prog.length()) != std::string::npos)
+    {
+        // Get a single top-level definition or expression.
+        pos = next_token(prog, end - 1, prog.length());
+        end = skip_token(prog, pos, prog.length());
+        next->link = Exp::spawn();
+        next = next->link;
+        next->parse(prog, pos, end);
+    }
+
+    // Add all top level definitions to the global environment
+    // and add all other expressions to the execution list.
+    std::vector<std::shared_ptr<Exp>> execution_list;
+    next = root;
+    while (next)
+    {
+        // Check if this is a define.
+        if (next->type == Type::LIST
+            && next->get_list()->type == Type::SYMBOL
+            && next->get_list()->get_string() == "define")
+        {
+            // Check if this is a variable definition.
+            auto def = next->get_list();
+            if (def->link->type == Type::SYMBOL)
+            {
+                init_env->let(def->link->get_string(), def->link->link);
+            }
+            // Check if this is a function shorthand.
+            else if (def->link->type == Type::LIST)
+            {
+                // Get parameter names.
+
+                // Build lambda.
+            }
+        }
+        else
+        {
+            // Add this expression to the execution list.
+            execution_list.push_back(next);
+        }
+
+        // Iterate to next top-level expression.
+        next = next->link;
+    }
 
     // Evaluate program.
-    std::shared_ptr<Task> result(new Task);
-    result->parent = result;
+    std::shared_ptr<Exp> ret = nullptr;
+    for (auto exp : execution_list)
+    {
+        ret = eval(init_env, exp);
+    }
+
+    return ret;
+}
+
+std::shared_ptr<Exp> Figure::eval(
+    std::shared_ptr<Env> init_env,
+    std::shared_ptr<Exp> root)
+{
+    std::shared_ptr<Exp> ret;
     std::stack<std::shared_ptr<Task>> tasks;
     std::shared_ptr<Task> first_task(new Task);
-    first_task->parent = result;
+    first_task->result = &ret;
     first_task->env = init_env;
     first_task->exp = root;
     tasks.push(first_task);
     while (!tasks.empty())
     {
-        std::shared_ptr<Task> cur_task = tasks.top();
-        std::shared_ptr<Task> parent = cur_task->parent;
-        std::shared_ptr<Env> env = cur_task->env;
-        std::shared_ptr<Exp> exp = cur_task->exp;
-        std::vector<std::shared_ptr<Exp>>& args = cur_task->args;
+        auto cur_task = tasks.top();
+        auto parent = cur_task->parent;
+        auto env = cur_task->env;
+        auto exp = cur_task->exp;
+        auto& alias = cur_task->alias;
+        auto& args = cur_task->args;
+        auto result = cur_task->result;
 
 #if 0
         exp->print();
@@ -74,136 +143,94 @@ std::shared_ptr<Exp> Figure::eval(const std::string& prog)
         case Type::NUMBER:
         case Type::VOID:
         case Type::NATIVE_FUNCTION:
+        case Type::SPECIAL_FORM:
         case Type::LAMBDA:
             // Atoms need no evaluation.
-            if (parent)
+            if (result)
             {
-                parent->args.push_back(exp);
+                *result = exp;
             }
             tasks.pop();
             break;
 
         case Type::SYMBOL:
             // Retrieve value bound to this symbol.
-            if (parent)
+            if (result)
             {
-                parent->args.push_back(env->get(exp->get_string()));
+                *result = env->get(exp->get_string());
             }
             tasks.pop();
             break;
 
         case Type::LIST:
-            // If empty list, just return.
+            // Check for empty list.
             if (exp->get_list() == nullptr)
             {
-                if (parent)
+                if (result)
                 {
-                    parent->args.push_back(exp);
+                    // Return void.
+                    *result = Exp::spawn();
+                    tasks.pop();
                 }
-                tasks.pop();
-                break;
             }
-            // If one element, evaluate it and return.
-            else if (!exp->get_list()->link)
+            else
             {
-                std::shared_ptr<Task> dep(new Task);
-                dep->parent = parent;
-                dep->env = env;
-                dep->exp = exp->get_list();
-                tasks.pop();
-                tasks.push(dep);
-                break;
-            }
-            // Check if we should evaluate the first element.
-            else if (args.size() == 0
-                     && ((exp->get_list()->type == Type::SYMBOL)
-                         || (exp->get_list()->type == Type::LIST)))
-            {
-                std::shared_ptr<Task> dep(new Task);
-                dep->parent = cur_task;
-                dep->env = env;
-                dep->exp = exp->get_list();
-                tasks.push(dep);
-                break;
-            }
-            // Check if this is a lambda substitution.
-            else if (args.size() > 0 && args[0]->type == Type::LAMBDA)
-            {
-                // Check if arguments need evaluated.
-                if (args.size() == 1)
+                auto first = exp->get_list();
+
+                // Check if this is a function application, special
+                // form, or data.
+                if (first->self_eval() == true || alias != nullptr)
                 {
-                    // Build list of arguments.
-                    std::stack<std::shared_ptr<Task>> arg_stack;
-                    for (auto it = exp->get_list()->link; it; it = it->link)
+                    // Use alias if it exists.
+                    if (alias)
+                    {
+                        first = alias;
+                        first->link = exp->get_list()->link;
+                    }
+
+                    // Check if this is a special form.
+                    if (first->type == Type::SPECIAL_FORM)
+                    {
+                        // Pass arguments un-evaluated to handler.
+                        if (args.size() == 0)
+                        {
+                            auto it = first->link;
+                            while (it != nullptr)
+                            {
+                                args.push_back(it);
+                                it = it->link;
+                            }
+                        }
+                        auto fn = first->get_special_form();
+                        fn(tasks);
+                    }
+                    // Treat as data.
+                    else
+                    {
+                        if (result != nullptr)
+                        {
+                            // Return data list as-is.
+                            *result = exp;
+                        }
+                        tasks.pop();
+                    }
+                }
+                else
+                {
+                    // Evaluate first parameter.
+                    if (args.size() == 0)
                     {
                         std::shared_ptr<Task> dep(new Task);
                         dep->parent = cur_task;
                         dep->env = env;
-                        dep->exp = it;
-                        arg_stack.push(dep);
+                        dep->exp = first;
+                        dep->result = &alias;
+
+                        tasks.push(dep);
                     }
-
-                    // Pass to be evaluated in reverse order.
-                    while (!arg_stack.empty())
-                    {
-                        tasks.push(arg_stack.top());
-                        arg_stack.pop();
-                    }
-
-                    break;
                 }
-
-                // Substitute evaluated arguments and build closure.
-                auto& lam = args[0]->get_lambda();
-                auto new_env = lam.env->spawn();
-                size_t arg_count = lam.args.size();
-                for (size_t i = 0; i < arg_count; ++i)
-                {
-                    new_env->let(lam.args[i], args[i+1]);
-                }
-
-                // Evaluate bodies and return result from last body.
-                std::stack<std::shared_ptr<Task>> bodies;
-                size_t body_count = lam.bodies.size();
-                for (size_t i = 0; i < body_count - 1; ++i)
-                {
-                    std::shared_ptr<Task> body(new Task);
-                    body->parent = nullptr;
-                    body->env = new_env;
-                    body->exp = lam.bodies[i];
-                    bodies.push(body);
-                }
-                std::shared_ptr<Task> ret(new Task);
-                ret->parent = parent;
-                ret->env = new_env;
-                ret->exp = lam.bodies[body_count - 1];
-                tasks.pop();
-                tasks.push(ret);
-                while (!bodies.empty())
-                {
-                    tasks.push(bodies.top());
-                    bodies.pop();
-                }
-
-                break;
             }
-            // Check if this is a native function call.
-            else if (args.size() > 0 && args[0]->type == Type::NATIVE_FUNCTION)
-            {
-                Native_Function& fn = args[0]->get_native_function();
-                fn(tasks);
-                break;
-            }
-            // Else, return list as-is.
-            else
-            {
-                if (parent)
-                {
-                    parent->args.push_back(exp);
-                }
-                tasks.pop();
-                break;
-            }
+            break;
 
         default:
             std::cerr << "Unsupported expression type.\n";
@@ -211,9 +238,6 @@ std::shared_ptr<Exp> Figure::eval(const std::string& prog)
             break;
         }
     }
-
-    // Get return value before cleanup.
-    std::shared_ptr<Exp> ret = result->args[0];
 
     return ret;
 }

@@ -2,14 +2,168 @@
  * @file special_form.cc
  */
 
+#include <cstdlib>
 #include <iostream>
 #include <memory>
 #include <vector>
 
 #include "env.h"
 #include "exp.h"
+#include "lambda.h"
 #include "special_form.h"
 #include "type.h"
+
+void special_lambda(std::stack<std::shared_ptr<Task>>& tasks)
+{
+    auto cur_task = tasks.top();
+    auto env = cur_task->env;
+    auto exp = cur_task->exp->get_list();
+    auto& args = cur_task->args;
+    auto& result = cur_task->result;
+
+    Lambda* lam = new Lambda;
+    lam->env = env;
+
+    // Get parameters.
+    auto lam_args = args[0];
+    if (lam_args->type == Type::LIST)
+    {
+        // Get multiple parameters.
+        auto it = lam_args->get_list();
+        while (it)
+        {
+            lam->args.push_back(it->get_string());
+            it = it->link;
+        }
+    }
+    else if (lam_args->type == Type::SYMBOL)
+    {
+        // Get single parameter.
+        lam->args.push_back(lam_args->get_string());
+    }
+    else
+    {
+        std::cerr << "Improperly formatted lambda.\n";
+        std::exit(1);
+    }
+
+    // Get bodies.
+    auto& body = lam_args->link;
+    while (body)
+    {
+        lam->bodies.push_back(body);
+        body = body->link;
+    }
+
+    // Build and return expression.
+    auto ret = Exp::spawn();
+    ret->type = Type::LAMBDA;
+    ret->data = lam;
+    if (result)
+    {
+        *result = ret;
+    }
+    tasks.pop();
+}
+
+void special_letrec(std::stack<std::shared_ptr<Task>>& tasks)
+{
+    auto cur_task = tasks.top();
+    auto env = cur_task->env;
+    auto exp = cur_task->exp->get_list();
+    auto& args = cur_task->args;
+    auto& result = cur_task->result;
+    size_t& eval_count = cur_task->eval_count;
+
+    std::stack<std::shared_ptr<Exp>> bodies;
+
+    // Check whether assigned values need evaluated.
+    if (eval_count <= 2)
+    {
+        size_t eval_needed = 0;
+        if (args[0]->type == Type::SYMBOL)
+        {
+            if (!args[1]->self_eval())
+            {
+                std::shared_ptr<Task> dep(new Task);
+                dep->env = env;
+                dep->exp = args[1];
+                dep->result = &args[1];
+
+                tasks.push(dep);
+                return;
+            }
+        }
+        else if (args[0]->type == Type::LIST)
+        {
+            auto it = args[0]->get_list();
+            while (it)
+            {
+                if (!it->get_list()->link->self_eval())
+                {
+                    ++eval_needed;
+                    std::shared_ptr<Task> dep(new Task);
+                    dep->env = env;
+                    dep->exp = it->get_list()->link;
+                    dep->result = &it->get_list()->link;
+
+                    tasks.push(dep);
+                }
+                it = it->link;
+            }
+        }
+
+        if (eval_needed > 0)
+        {
+            return;
+        }
+    }
+
+    // Build environment.
+    auto new_env = env->spawn();
+    auto it = args[0];
+    if (it->type == Type::SYMBOL)
+    {
+        // Get single assignment.
+        new_env->let(it->get_string(), args[1]);
+        it = args[2];
+    }
+    else if (it->type == Type::LIST)
+    {
+        it = it->get_list();
+        while (it)
+        {
+            new_env->let(it->get_list()->get_string(), it->get_list()->link);
+            it = it->link;
+        }
+        it = args[1];
+    }
+
+    // Get bodies.
+    while (it)
+    {
+        bodies.push(it);
+        it = it->link;
+    }
+
+    // Build tasks.
+    tasks.pop();
+    std::shared_ptr<Task> ret(new Task);
+    ret->env = new_env;
+    ret->exp = bodies.top();
+    ret->result = result;
+    tasks.push(ret);
+    bodies.pop();
+    while (!bodies.empty())
+    {
+        std::shared_ptr<Task> next(new Task);
+        next->env = new_env;
+        next->exp = bodies.top();
+
+        tasks.push(next);
+        bodies.pop();
+    }
+}
 
 void special_if(std::stack<std::shared_ptr<Task>>& tasks)
 {
@@ -17,7 +171,7 @@ void special_if(std::stack<std::shared_ptr<Task>>& tasks)
     auto env = cur_task->env;
     auto exp = cur_task->exp->get_list();
     auto& args = cur_task->args;
-    auto result = cur_task->result;
+    auto& result = cur_task->result;
 
     // Check argument count.
     if (args.size() != 2 && args.size() != 3)

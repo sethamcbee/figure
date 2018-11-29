@@ -6,7 +6,6 @@
 #ifndef BUILTIN_H
 #define BUILTIN_H
 
-#include <stack>
 #include <vector>
 
 #include "type.h"
@@ -15,19 +14,13 @@ class Exp;
 class Env;
 class Task;
 
-void eval_if(std::stack<std::shared_ptr<Task>>& tasks);
-void eval_and(std::stack<std::shared_ptr<Task>>& tasks);
-void eval_or(std::stack<std::shared_ptr<Task>>& tasks);
-void eval_lambda(std::stack<std::shared_ptr<Task>>& tasks);
-void eval_let(std::stack<std::shared_ptr<Task>>& tasks);
-void eval_letrec(std::stack<std::shared_ptr<Task>>& tasks);
-void eval_begin(std::stack<std::shared_ptr<Task>>& tasks);
-void eval_add(std::stack<std::shared_ptr<Task>>& tasks);
-void eval_sub(std::stack<std::shared_ptr<Task>>& tasks);
-void eval_mul(std::stack<std::shared_ptr<Task>>& tasks);
-void eval_div(std::stack<std::shared_ptr<Task>>& tasks);
-void eval_numeq(std::stack<std::shared_ptr<Task>>& tasks);
-void eval_display(std::stack<std::shared_ptr<Task>>& tasks);
-void eval_write(std::stack<std::shared_ptr<Task>>& tasks);
+// Mathematical operators.
+std::shared_ptr<Exp> eval_add(std::vector<std::shared_ptr<Exp>>& args);
+std::shared_ptr<Exp> eval_sub(std::vector<std::shared_ptr<Exp>>& args);
+std::shared_ptr<Exp> eval_mul(std::vector<std::shared_ptr<Exp>>& args);
+std::shared_ptr<Exp> eval_div(std::vector<std::shared_ptr<Exp>>& args);
+std::shared_ptr<Exp> eval_numeq(std::vector<std::shared_ptr<Exp>>& args);
+
+std::shared_ptr<Exp> eval_display(std::vector<std::shared_ptr<Exp>>& args);
 
 #endif // BUILTIN_H

@@ -341,6 +341,10 @@ void Exp::print() const
         std::string* p = (std::string*)data;
         std::cout << *p;
     }
+    else if (type == Type::LAMBDA)
+    {
+        std::cout << "#lambda";
+    }
     else if (type == Type::LIST)
     {
         std::cout << '(';

@@ -27,8 +27,16 @@ std::shared_ptr<Exp> Figure::run(const std::string& prog)
     exp_false->type = Type::BOOLEAN;
     exp_false->data = new bool(false);
     init_env->let("false", exp_false);
-    //init_env->builtin("if", eval_if);
+    init_env->special_form("lambda", special_lambda);
+    init_env->special_form("let", special_letrec);
+    init_env->special_form("letrec", special_letrec);
     init_env->special_form("if", special_if);
+    init_env->builtin("+", eval_add);
+    init_env->builtin("-", eval_sub);
+    init_env->builtin("*", eval_mul);
+    init_env->builtin("/", eval_div);
+    init_env->builtin("=", eval_numeq);
+    init_env->builtin("display", eval_display);
 #if 0
     init_env->builtin("and", eval_and);
     init_env->builtin("or", eval_or);
@@ -36,12 +44,6 @@ std::shared_ptr<Exp> Figure::run(const std::string& prog)
     init_env->builtin("let", eval_let);
     init_env->builtin("letrec", eval_letrec);
     init_env->builtin("begin", eval_begin);
-    init_env->builtin("+", eval_add);
-    init_env->builtin("-", eval_sub);
-    init_env->builtin("*", eval_mul);
-    init_env->builtin("/", eval_div);
-    init_env->builtin("=", eval_numeq);
-    init_env->builtin("display", eval_display);
     init_env->builtin("write", eval_write);
 #endif
 
@@ -128,9 +130,11 @@ std::shared_ptr<Exp> Figure::eval(
         auto exp = cur_task->exp;
         auto& alias = cur_task->alias;
         auto& args = cur_task->args;
-        auto result = cur_task->result;
+        auto& result = cur_task->result;
+        size_t& eval_count = cur_task->eval_count;
+        ++eval_count;
 
-#if 0
+#if 1
         exp->print();
         std::cout << std::endl;
 #endif
@@ -157,6 +161,12 @@ std::shared_ptr<Exp> Figure::eval(
             if (result)
             {
                 *result = env->get(exp->get_string());
+            }
+            else
+            {
+                // Retrieve and discard, for side-effects.
+                auto discard = env->get(exp->get_string());
+                discard = nullptr;
             }
             tasks.pop();
             break;
@@ -206,10 +216,100 @@ std::shared_ptr<Exp> Figure::eval(
                     // Check if this is a lambda evaluation.
                     else if (first->type == Type::LAMBDA)
                     {
+                        auto lam = first->get_lambda();
+
+                        // Evaluate arguments.
+                        if (args.size() == 0 && first->link)
+                        {
+                            auto it = first->link;
+
+                            while (it)
+                            {
+                                args.push_back(it);
+
+                                if (!it->self_eval())
+                                {
+                                    std::shared_ptr<Task> dep(new Task);
+                                    dep->env = env;
+                                    dep->exp = it;
+                                    dep->result = &args[args.size() - 1];
+
+                                    tasks.push(dep);
+                                }
+
+                                it = it->link;
+                            }
+
+                            break;
+                        }
+
+                        // Build closure.
+                        auto clos = lam.env->spawn();
+                        size_t arg_count = lam.args.size();
+                        for (size_t i = 0; i < arg_count; ++i)
+                        {
+                            clos->let(lam.args[i], args[i]);
+                        }
+
+                        // Evaluate bodies and return result from
+                        // last body.
+                        std::stack<std::shared_ptr<Task>> bodies;
+                        size_t body_count = lam.bodies.size();
+                        for (size_t i = 0; i < body_count - 1; ++i)
+                        {
+                            std::shared_ptr<Task> body(new Task);
+                            body->env = clos;
+                            body->exp = lam.bodies[i];
+                            bodies.push(body);
+                        }
+                        std::shared_ptr<Task> ret(new Task);
+                        ret->env = clos;
+                        ret->exp = lam.bodies[body_count - 1];
+                        ret->result = result;
+                        tasks.pop();
+                        tasks.push(ret);
+                        while (!bodies.empty())
+                        {
+                            tasks.push(bodies.top());
+                            bodies.pop();
+                        }
+
+                        break;
                     }
                     // Check if this is a builtin function.
                     else if (first->type == Type::NATIVE_FUNCTION)
                     {
+                        // Evaluate arguments.
+                        if (eval_count == 2 && first->link)
+                        {
+                            auto it = first->link;
+                            while (it)
+                            {
+                                args.push_back(it);
+                                if (!it->self_eval())
+                                {
+                                    std::shared_ptr<Task> dep(new Task);
+                                    dep->env = env;
+                                    dep->exp = it;
+                                    dep->result = &args[args.size() - 1];
+
+                                    tasks.push(dep);
+                                }
+
+                                it = it->link;
+                            }
+
+                            continue;
+                        }
+
+                        // Pass arguments to built-in function.
+                        auto fn = first->get_native_function();
+                        auto ret = fn(args);
+                        if (result)
+                        {
+                            *result = ret;
+                        }
+                        tasks.pop();
                     }
                     // Treat as data.
                     else

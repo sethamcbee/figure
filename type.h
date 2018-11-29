@@ -48,10 +48,13 @@ public:
 
     /// Where to put the result of this evaluation.
     std::shared_ptr<Exp>* result = nullptr;
+
+    /// How many times this task has been partially evaluated.
+    size_t eval_count = 0;
 };
 
 typedef double Number_Type;
+typedef std::function<std::shared_ptr<Exp>(std::vector<std::shared_ptr<Exp>>&)> Native_Function;
 typedef std::function<void(std::stack<std::shared_ptr<Task>>&)> Special_Form;
-typedef std::function<void(std::stack<std::shared_ptr<Task>>&)> Native_Function;
 
 #endif // TYPE_H

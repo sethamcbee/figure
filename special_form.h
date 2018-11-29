@@ -13,6 +13,7 @@ class Task;
 
 void special_lambda(std::stack<std::shared_ptr<Task>>& tasks);
 void special_let(std::stack<std::shared_ptr<Task>>& tasks);
+void special_letrec(std::stack<std::shared_ptr<Task>>& tasks);
 void special_if(std::stack<std::shared_ptr<Task>>& tasks);
 
 #endif // SPECIAL_H

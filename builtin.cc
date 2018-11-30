@@ -76,7 +76,7 @@ std::shared_ptr<Exp> eval_numeq(std::vector<std::shared_ptr<Exp>>& args)
     *p = (args[0]->get_number() == args[1]->get_number());
 
     auto exp = Exp::spawn();
-    exp->type == Type::BOOLEAN;
+    exp->type = Type::BOOLEAN;
     exp->data = p;
 
     return exp;
@@ -95,7 +95,7 @@ std::shared_ptr<Exp> eval_display(std::vector<std::shared_ptr<Exp>>& args)
     {
         // Escape newlines.
         const std::string& base_str = args[0]->get_string();
-        if (base_str.find("\n") != std::string::npos)
+        if (base_str.find("\\n") != std::string::npos)
         {
             std::string escaped = base_str;
             replace_all(escaped, "\\n", "\n");

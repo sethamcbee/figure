@@ -389,6 +389,20 @@ bool Exp::self_eval() const
     }
 }
 
+size_t Exp::length() const
+{
+    size_t len = 0;
+
+    auto it = link;
+    while (it)
+    {
+        ++len;
+        it = it->link;
+    }
+
+    return len;
+}
+
 const std::string& Exp::get_string() const
 {
     if (type == Type::STRING || type == Type::SYMBOL)

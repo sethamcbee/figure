@@ -45,6 +45,9 @@ public:
     /// Return whether this expression is fully evaluated.
     bool self_eval() const;
 
+    /// Remaining length of the list, past this element.
+    size_t length() const;
+
     /// Get a string from this expression.
     const std::string& get_string() const;
 

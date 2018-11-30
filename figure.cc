@@ -70,6 +70,7 @@ std::shared_ptr<Exp> Figure::run(const std::string& prog)
     // Add all top level definitions to the global environment
     // and add all other expressions to the execution list.
     std::vector<std::shared_ptr<Exp>> execution_list;
+    std::vector<std::shared_ptr<Exp>> define_list;
     next = root;
     while (next)
     {
@@ -83,6 +84,7 @@ std::shared_ptr<Exp> Figure::run(const std::string& prog)
             if (def->link->type == Type::SYMBOL)
             {
                 init_env->let(def->link->get_string(), def->link->link);
+                define_list.push_back(def->link);
             }
             // Check if this is a function shorthand.
             else if (def->link->type == Type::LIST)
@@ -100,6 +102,14 @@ std::shared_ptr<Exp> Figure::run(const std::string& prog)
 
         // Iterate to next top-level expression.
         next = next->link;
+    }
+
+    // Evaluate defines.
+    std::shared_ptr<Exp> def_eval = nullptr;
+    for (auto exp : define_list)
+    {
+        def_eval = eval(init_env, exp->link);
+        init_env->let(exp->get_string(), def_eval);
     }
 
     // Evaluate program.
@@ -134,7 +144,7 @@ std::shared_ptr<Exp> Figure::eval(
         size_t& eval_count = cur_task->eval_count;
         ++eval_count;
 
-#if 1
+#if 0
         exp->print();
         std::cout << std::endl;
 #endif
@@ -201,15 +211,6 @@ std::shared_ptr<Exp> Figure::eval(
                     if (first->type == Type::SPECIAL_FORM)
                     {
                         // Pass arguments un-evaluated to handler.
-                        if (args.size() == 0)
-                        {
-                            auto it = first->link;
-                            while (it != nullptr)
-                            {
-                                args.push_back(it);
-                                it = it->link;
-                            }
-                        }
                         auto fn = first->get_special_form();
                         fn(tasks);
                     }
@@ -221,23 +222,26 @@ std::shared_ptr<Exp> Figure::eval(
                         // Evaluate arguments.
                         if (args.size() == 0 && first->link)
                         {
-                            auto it = first->link;
+                            args.resize(first->length());
 
+                            size_t arg_i = 0;
+                            auto it = first->link;
                             while (it)
                             {
-                                args.push_back(it);
+                                args[arg_i] = it;
 
                                 if (!it->self_eval())
                                 {
                                     std::shared_ptr<Task> dep(new Task);
                                     dep->env = env;
                                     dep->exp = it;
-                                    dep->result = &args[args.size() - 1];
+                                    dep->result = &args[arg_i];
 
                                     tasks.push(dep);
                                 }
 
                                 it = it->link;
+                                ++arg_i;
                             }
 
                             break;
@@ -282,24 +286,29 @@ std::shared_ptr<Exp> Figure::eval(
                         // Evaluate arguments.
                         if (eval_count == 2 && first->link)
                         {
+                            args.resize(first->length());
+
                             auto it = first->link;
+                            size_t arg_i = 0;
                             while (it)
                             {
-                                args.push_back(it);
+                                args[arg_i] = it;
+
                                 if (!it->self_eval())
                                 {
                                     std::shared_ptr<Task> dep(new Task);
                                     dep->env = env;
                                     dep->exp = it;
-                                    dep->result = &args[args.size() - 1];
+                                    dep->result = &args[arg_i];
 
                                     tasks.push(dep);
                                 }
 
                                 it = it->link;
+                                ++arg_i;
                             }
 
-                            continue;
+                            break;
                         }
 
                         // Pass arguments to built-in function.

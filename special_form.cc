@@ -25,7 +25,7 @@ void special_lambda(std::stack<std::shared_ptr<Task>>& tasks)
     lam->env = env;
 
     // Get parameters.
-    auto lam_args = args[0];
+    auto lam_args = exp->link;
     if (lam_args->type == Type::LIST)
     {
         // Get multiple parameters.
@@ -78,65 +78,86 @@ void special_letrec(std::stack<std::shared_ptr<Task>>& tasks)
     std::stack<std::shared_ptr<Exp>> bodies;
 
     // Check whether assigned values need evaluated.
-    if (eval_count <= 2)
+    if (args.size() == 0)
     {
+        args.resize(exp->length());
+
         size_t eval_needed = 0;
-        if (args[0]->type == Type::SYMBOL)
+        if (exp->link->type == Type::SYMBOL)
         {
-            if (!args[1]->self_eval())
+            if (!exp->link->link->self_eval())
             {
+                args.resize(1);
+
                 std::shared_ptr<Task> dep(new Task);
                 dep->env = env;
-                dep->exp = args[1];
-                dep->result = &args[1];
+                dep->exp = exp->link->link;
+                dep->result = &args[0];
 
                 tasks.push(dep);
                 return;
             }
-        }
-        else if (args[0]->type == Type::LIST)
-        {
-            auto it = args[0]->get_list();
-            while (it)
+            else
             {
-                if (!it->get_list()->link->self_eval())
+                args[0] = exp->link->link;
+            }
+        }
+        else if (exp->link->type == Type::LIST)
+        {
+            size_t arg_i = 0;
+            auto this_arg = exp->link->get_list();
+            while (this_arg)
+            {
+                if (!this_arg->get_list()->link->self_eval())
                 {
                     ++eval_needed;
+                    args.push_back(nullptr);
+
                     std::shared_ptr<Task> dep(new Task);
                     dep->env = env;
-                    dep->exp = it->get_list()->link;
-                    dep->result = &it->get_list()->link;
+                    dep->exp = this_arg->get_list()->link;
+                    dep->result = &args[arg_i];
 
                     tasks.push(dep);
                 }
-                it = it->link;
-            }
-        }
+                else
+                {
+                    args[arg_i] = this_arg->get_list()->link;
+                }
 
-        if (eval_needed > 0)
-        {
-            return;
+                this_arg = this_arg->link;
+                ++arg_i;
+            }
+
+            if (eval_needed > 0)
+            {
+                return;
+            }
         }
     }
 
     // Build environment.
     auto new_env = env->spawn();
-    auto it = args[0];
+    auto it = exp->link;
+    size_t arg = 0;
     if (it->type == Type::SYMBOL)
     {
         // Get single assignment.
-        new_env->let(it->get_string(), args[1]);
-        it = args[2];
+        new_env->let(it->get_string(), args[0]);
+
+        // Point to start of bodies.
+        it = it->link->link;
     }
     else if (it->type == Type::LIST)
     {
         it = it->get_list();
         while (it)
         {
-            new_env->let(it->get_list()->get_string(), it->get_list()->link);
+            new_env->let(it->get_list()->get_string(), args[arg]);
             it = it->link;
+            ++arg;
         }
-        it = args[1];
+        it = exp->link->link;
     }
 
     // Get bodies.

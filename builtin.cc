@@ -44,17 +44,56 @@ std::shared_ptr<Exp> eval_add(std::vector<std::shared_ptr<Exp>>& args)
 
 std::shared_ptr<Exp> eval_sub(std::vector<std::shared_ptr<Exp>>& args)
 {
+    Number_Type difference = args[0]->get_number();
+    size_t arg_count = args.size();
+    for (size_t i = 1; i < arg_count; ++i)
+    {
+        difference -= args[i]->get_number();
+    }
 
+    auto p = new Number_Type;
+    *p = difference;
+
+    auto ret = Exp::spawn();
+    ret->type = Type::NUMBER;
+    ret->data = p;
+    return ret;
 }
 
 std::shared_ptr<Exp> eval_mul(std::vector<std::shared_ptr<Exp>>& args)
 {
+    Number_Type product = 1;
+    for (auto& n : args)
+    {
+        product *= n->get_number();
+    }
 
+    auto p = new Number_Type;
+    *p = product;
+
+    auto ret = Exp::spawn();
+    ret->type = Type::NUMBER;
+    ret->data = p;
+    return ret;
 }
 
 std::shared_ptr<Exp> eval_div(std::vector<std::shared_ptr<Exp>>& args)
 {
 
+    Number_Type quotient = args[0]->get_number();
+    size_t arg_count = args.size();
+    for (size_t i = 1; i < arg_count; ++i)
+    {
+        quotient /= args[i]->get_number();
+    }
+
+    auto p = new Number_Type;
+    *p = quotient;
+
+    auto ret = Exp::spawn();
+    ret->type = Type::NUMBER;
+    ret->data = p;
+    return ret;
 }
 
 std::shared_ptr<Exp> eval_numeq(std::vector<std::shared_ptr<Exp>>& args)

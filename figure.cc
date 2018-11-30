@@ -259,6 +259,11 @@ std::shared_ptr<Exp> Figure::eval(
                         // last body.
                         std::stack<std::shared_ptr<Task>> bodies;
                         size_t body_count = lam.bodies.size();
+                        if (body_count == 0)
+                        {
+                            std::cerr << "Lambda without body.\n";
+                            std::exit(1);
+                        }
                         for (size_t i = 0; i < body_count - 1; ++i)
                         {
                             std::shared_ptr<Task> body(new Task);

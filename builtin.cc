@@ -66,12 +66,6 @@ std::shared_ptr<Exp> eval_numeq(std::vector<std::shared_ptr<Exp>>& args)
         std::exit(1);
     }
 
-    std::cout << "arg1: ";
-    args[0]->print();
-    std::cout << "\narg2: ";
-    args[1]->print();
-    std::cout << "\n";
-
     auto p = new bool;
     *p = (args[0]->get_number() == args[1]->get_number());
 

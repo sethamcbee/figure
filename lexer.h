@@ -18,6 +18,16 @@
 namespace Figure
 {
 
+bool is_delim(Char c);
+bool is_special(Char c);
+bool is_id_start(Char c);
+bool is_initial(Char c);
+bool is_subsequent(Char c);
+bool is_special_subsequent(Char c);
+
+using Location = size_t;
+
+struct LEOF {};
 struct LeftParen {};
 struct RightParen {};
 struct Comma {};
@@ -26,242 +36,52 @@ struct Quote {};
 struct Backtick {};
 struct Dot {};
 
-class Token
+struct Token
 {
-public:
+    using Value = std::variant<
+		LEOF, Bool, Char, Number, String, Id, LeftParen, RightParen,
+        Comma, CommaAt, Quote, Backtick, Dot>;
 
-    char* character = 0;
-    std::string source;
-    std::variant
-        <Bool, Char, Number, String, Id, LeftParen, RightParen,
-        Comma, CommaAt, Quote, Backtick, Dot> value;
+    Value value;
+    Location pos;
 
-    Token() {}
-
-    Token(std::string_view src, auto start, auto end) : character{&*start}, source{start, end}
+    Token(Value v, Location l)
     {
-        // Check for string literal.
-        if (*start == '"')
-        {
-            value = String{std::string{start + 1, end - 1}};
-        }
-        // Check for number.
-        else if (isdigit(*start))
-        {
-            value = Number{std::stod(source)};
-        }
-        // Check for booleans.
-        else if (source == "#t" || source == "#true")
-        {
-            value = Bool{true};
-        }
-        else if (source == "#f" || source == "#false")
-        {
-            value = Bool{false};
-        }
-        // Check for special symbols.
-        else if (source == "(")
-        {
-            value = LeftParen{};
-        }
-        else if (source == ")")
-        {
-            value = RightParen{};
-        }
-        else if (source == ",")
-        {
-            value = Comma{};
-        }
-        else if (source == ",@")
-        {
-            value = CommaAt{};
-        }
-        else if (source == "'")
-        {
-            value = Quote{};
-        }
-        else if (source == "`")
-        {
-            value = Backtick{};
-        }
-        else if (source == ".")
-        {
-            value = Dot{};
-        }
-        // Else, treat as identifier.
-        else
-        {
-            value = Id{source};
-        }
+		value = v;
+		pos = l;
+	}
 
-        // TODO: Implement characters, verticle lines, and others.
-    }
+    operator Value&()
+    {
+		return value;
+	}
+    
+    operator Value() const
+    {
+		return value;
+	}
 };
-
-bool is_delim(char c);
 
 class Lexer
 {
 public:
 
+	Location pos = 0;
+	Char ch;
     std::string source;
+    std::istream* input;
     std::list<Token> tokens;
 
     Lexer() {}
 
-    Lexer(std::string_view src) : source{src}
-    {
-        auto start = source.begin();
-        auto prev = start;
-        auto next = start;
-        auto end = source.end();
+    Lexer(std::istream& s);
 
-        while (next < end)
-        {
-            // Skip over delimiters.
-            while (is_delim(*next) && next < end)
-            {
-                // Skip over comments.
-                if (*next == ';')
-                {
-                    while (*next != '\n' && next < end)
-                    {
-                        ++next;
-                    }
-                    prev = next;
-                }
+	void next_token();
+    Token get_token();
+    void push_token(const Token& tok);
+    bool good();
 
-                // Skip over whitespace.
-                while (isspace(*next) && next < end)
-                {
-                    ++next;
-                }
-                prev = next;
-
-                // Quotes are tokens.
-                if (*next == '\'')
-                {
-                    ++next;
-                    auto tok = Token{source, prev, next};
-                    tokens.push_back(tok);
-                }
-                prev = next;
-
-                // Parenthesis are tokens.
-                if (*next == '(' || *next == ')')
-                {
-                    ++next;
-                    auto tok = Token{source, prev, next};
-                    tokens.push_back(tok);
-                }
-                prev = next;
-
-                // Strings are tokens.
-                if (*next == '"')
-                {
-                    while (next < end)
-                    {
-                        ++next;
-                        if (*next == '"' && *std::prev(next, 1) != '\\')
-                        {
-                            ++next;
-                            break;
-                        }
-                    }
-                    auto tok = Token{source, prev, next};
-                    tokens.push_back(tok);
-                }
-                prev = next;
-            }
-
-            // Check if there are any tokens left.
-            if (prev < end)
-            {
-                // Token found, get all characters.
-                do
-                {
-                    ++next;
-                }
-                while (!is_delim(*next) && next <= end);
-
-                auto tok = Token{source, prev, next};
-                tokens.push_back(tok);
-
-                prev = next;
-            }
-        }
-
-        // Perform quote substitution.
-        for (auto it = tokens.begin(); it != tokens.end(); ++it)
-        {
-            size_t quote_n{0};
-            while (auto quote = std::get_if<Quote>(&it->value))
-            {
-                static std::string lp_src{"("};
-                static std::string q_src{"quote"};
-
-                ++quote_n;
-                it = tokens.erase(it);
-
-                Token lp{lp_src, lp_src.begin(), lp_src.end()};
-                tokens.insert(it, lp);
-
-                Token q{q_src, q_src.begin(), q_src.end()};
-                it = tokens.insert(it, q);
-                ++it;
-            }
-
-            if (quote_n > 0)
-            {
-                auto next_run = it;
-
-                // Find matching parenthesis.
-                if (auto lp = std::get_if<LeftParen>(&it->value))
-                {
-                    int balance{-1};
-                    do
-                    {
-                        ++it;
-                        if (it == tokens.end())
-                        {
-                            error();
-                        }
-
-                        if (std::get_if<LeftParen>(&it->value))
-                        {
-                            --balance;
-                        }
-
-                        if (std::get_if<RightParen>(&it->value))
-                        {
-                            ++balance;
-                        }
-                    }
-                    while (balance != 0);
-                }
-
-                while (quote_n > 0)
-                {
-                    static std::string rp_src{")"};
-
-                    ++it;
-                    --quote_n;
-                    Token rp{rp_src, rp_src.begin(), rp_src.end()};
-                    it = tokens.insert(it, rp);
-                }
-
-                it = next_run;
-            }
-        }
-    }
-
-    void print()
-    {
-        for (auto tok : tokens)
-        {
-            std::cout << tok.source << " ";
-        }
-    }
+    void print() {}
 
     void error()
     {
@@ -270,7 +90,7 @@ public:
 
     void error(std::string_view msg)
     {
-        std::cerr << "lexer error:\n" << msg << std::endl;
+        std::cerr << "Lexer error: " << msg << std::endl;
         exit(1);
     }
 };

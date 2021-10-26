@@ -11,27 +11,87 @@ namespace Figure
 
 struct Bool
 {
-    bool value;
+	using Value = bool;
+	
+    Value value;
+    
+    operator Value&()
+    {
+		return value;
+	}
+    
+    operator Value() const
+    {
+		return value;
+	}
 };
 
 struct Number
 {
-    double value;
+	using Value = double;
+	
+    Value value;
+
+    operator Value&()
+    {
+		return value;
+	}
+
+	operator Value() const
+	{
+		return value;
+	}
 };
 
 struct Char
 {
-    char value;
+	using Value = char;
+	
+    Value value;
+
+    operator Value&()
+    {
+		return value;
+	}
+
+    operator Value() const
+    {
+		return value;
+	}
 };
 
 struct String
 {
-    std::string value;
+	using Value = std::string;
+	
+    Value value;
+
+    operator Value&()
+    {
+		return value;
+	}
+
+	operator Value() const
+	{
+		return value;
+	}
 };
 
 struct Id
 {
-    std::string value;
+	using Value = std::string;
+	 
+    Value value;
+
+    operator Value&()
+    {
+		return value;
+	}
+
+	operator Value()
+	{
+		return value;
+	}
 };
 
 }

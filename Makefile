@@ -66,8 +66,6 @@ test: $(OUTPUT)
 .PHONY: run
 run: $(OUTPUT)
 	./$(OUTPUT) test/test.scm build/test.cc
-	#$(CXX) -std=c++17 -O2 -Wall build/test.cc -o build/test
-	#build/test
 
 .PHONY: build
 build: $(OUTPUT)

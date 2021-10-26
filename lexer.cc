@@ -73,6 +73,18 @@ bool is_special_subsequent(Char c)
 	}
 }
 
+bool is_line_ending(Char c)
+{
+	switch (c)
+	{
+	case '\n':
+	case '\r':
+		return true;
+	default:
+		return false;
+	}
+}
+
 Lexer::Lexer(std::istream& s)
 {
 	input = &s;
@@ -83,21 +95,39 @@ void Lexer::next_token()
 {
 	std::string src;
 
-	// Skip whitespace.
-	if (isspace(ch) && input->good())
+	while (input->good() && (isspace(ch) || ch == ';'))
 	{
-		src += ch;
-		while (input->good())
+		// Skip whitespace.
+		if (isspace(ch))
 		{
-			input->get(ch);
-			if (!isspace(ch))
+			src += ch;
+			while (input->good())
 			{
-				break;
+				input->get(ch);
+				if (!isspace(ch))
+				{
+					break;
+				}
 			}
+			source += src;
+			pos += src.length();
+			src = "";
 		}
-		source += src;
-		pos += src.length();
-		src = "";
+
+		// Skip comments.
+		if (ch == ';')
+		{
+			src += ch;
+			input->get(ch);
+			while (input->good() && !is_line_ending(ch))
+			{
+				src += ch;
+				input->get(ch);
+			}
+			source += src;
+			pos += src.length();
+			src = "";
+		}
 	}
 
 	// EOF.
@@ -272,7 +302,25 @@ void Lexer::push_token(const Token& tok)
 
 bool Lexer::good()
 {
-	return input->good();
+	if (!input->good())
+	{
+		return false;
+	}
+
+	// Check if we are at EOF.
+	if (tokens.empty())
+	{
+		next_token();
+	}
+	auto tok = tokens.front();
+	if (std::get_if<LEOF>(&tok.value))
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
 }
 
 }

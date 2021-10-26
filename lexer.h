@@ -24,6 +24,7 @@ bool is_id_start(Char c);
 bool is_initial(Char c);
 bool is_subsequent(Char c);
 bool is_special_subsequent(Char c);
+bool is_line_ending(Char c);
 
 using Location = size_t;
 

@@ -4,14 +4,10 @@
 
 #pragma once
 
-#include <cctype>
-#include <cstdlib>
 #include <iostream>
 #include <list>
-#include <string>
 #include <string_view>
 #include <variant>
-#include <vector>
 
 #include "literal.h"
 
@@ -21,6 +17,7 @@ namespace Figure
 bool is_delim(Char c);
 bool is_special(Char c);
 bool is_id_start(Char c);
+bool is_peculiar(Char c);
 bool is_initial(Char c);
 bool is_subsequent(Char c);
 bool is_special_subsequent(Char c);
@@ -46,21 +43,11 @@ struct Token
     Value value;
     Location pos;
 
-    Token(Value v, Location l)
-    {
-		value = v;
-		pos = l;
-	}
+    Token(Value v, Location l) : value(v), pos(l) {}
 
-    operator Value&()
-    {
-		return value;
-	}
+    operator Value&();
     
-    operator Value() const
-    {
-		return value;
-	}
+    operator Value() const;
 };
 
 class Lexer
@@ -84,16 +71,9 @@ public:
 
     void print() {}
 
-    void error()
-    {
-        error("Unspecified error.");
-    }
+    void error();
 
-    void error(std::string_view msg)
-    {
-        std::cerr << "Lexer error: " << msg << std::endl;
-        exit(1);
-    }
+    void error(std::string_view msg);
 };
 
 }

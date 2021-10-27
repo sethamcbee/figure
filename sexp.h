@@ -7,13 +7,14 @@
 #include <list>
 #include <variant>
 
-#include "lexer.h"
 #include "literal.h"
 
 namespace Figure
 {
 
+struct Lexer;
 struct Sexp;
+
 using SexpList = std::list<Sexp>;
 
 struct Sexp

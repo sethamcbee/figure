@@ -2,6 +2,9 @@
  * @file lexer.cc
  */
 
+#include <cctype>
+#include <cstdlib>
+
 #include "lexer.h"
 
 namespace Figure
@@ -46,7 +49,19 @@ bool is_special(Char c)
 
 bool is_id_start(Char c)
 {
-	return is_initial(c) || c == '|';
+	return is_initial(c) || c == '|' || is_peculiar(c);
+}
+
+bool is_peculiar(Char c)
+{
+	switch (c)
+	{
+	case '+':
+	case '-':
+		return true;
+	default:
+		return false;
+	}
 }
 
 bool is_initial(Char c)
@@ -83,6 +98,21 @@ bool is_line_ending(Char c)
 	default:
 		return false;
 	}
+}
+
+bool is_number(Char c)
+{
+	return isdigit(c);
+}
+
+Token::operator Value&()
+{
+	return value;
+}
+
+Token::operator Value() const
+{
+	return value;
 }
 
 Lexer::Lexer(std::istream& s)
@@ -168,6 +198,21 @@ void Lexer::next_token()
 		Token tok{Id{src}, pos};
 		tokens.push_back(tok);
 	}
+	else if (is_peculiar(ch))
+	{
+		src += ch;
+		while (input->good())
+		{
+			input->get(ch);
+			if (!is_subsequent(ch))
+			{
+				break;
+			}
+			src += ch;
+		}
+		Token tok{Id{src}, pos};
+		tokens.push_back(tok);
+	}
 	// Booleans and characters.
 	else if (ch == '#')
 	{
@@ -198,6 +243,20 @@ void Lexer::next_token()
 		{
 			error("Invalid character.");
 		}
+	}
+	// Numbers.
+	else if (is_number(ch))
+	{
+		src += ch;
+		input->get(ch);
+		while (input->good() && is_number(ch))
+		{
+			src += ch;
+			input->get(ch);
+		}
+		Number val{std::stod(src)};
+		Token tok{val, pos};
+		tokens.push_back(tok);
 	}
 	// Strings.
 	else if (ch == '"')
@@ -242,6 +301,20 @@ void Lexer::next_token()
 		Token tok{RightParen{}, pos};
 		tokens.push_back(tok);
 	}
+	else if (ch == '[')
+	{
+		src += ch;
+		input->get(ch);
+		Token tok{LeftParen{}, pos};
+		tokens.push_back(tok);
+	}
+	else if (ch == ']')
+	{
+		src += ch;
+		input->get(ch);
+		Token tok{RightParen{}, pos};
+		tokens.push_back(tok);
+	}
 	// Quote.
 	else if (ch == '\'')
 	{
@@ -276,7 +349,9 @@ void Lexer::next_token()
 	}
 	else
 	{
-		error("Invalid character.");
+		std::string err = "Invalid character: ";
+		err += ch;
+		error(err);
 	}
 	
 	source += src;
@@ -321,6 +396,18 @@ bool Lexer::good()
 	{
 		return true;
 	}
+}
+
+void Lexer::error()
+{
+	error("Unspecified error.");
+}
+
+void Lexer::error(std::string_view msg)
+{
+	std::cerr << "At pos: " << pos << std::endl;
+	std::cerr << "Lexer error: " << msg << std::endl;
+	exit(1);
 }
 
 }

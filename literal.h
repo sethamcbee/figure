@@ -9,21 +9,17 @@
 namespace Figure
 {
 
+struct Lexer;
+
 struct Bool
 {
 	using Value = bool;
 	
     Value value;
     
-    operator Value&()
-    {
-		return value;
-	}
+    operator Value&();
     
-    operator Value() const
-    {
-		return value;
-	}
+    operator Value() const;
 };
 
 struct Number
@@ -32,15 +28,9 @@ struct Number
 	
     Value value;
 
-    operator Value&()
-    {
-		return value;
-	}
+    operator Value&();
 
-	operator Value() const
-	{
-		return value;
-	}
+	operator Value() const;
 };
 
 struct Char
@@ -49,15 +39,9 @@ struct Char
 	
     Value value;
 
-    operator Value&()
-    {
-		return value;
-	}
+    operator Value&();
 
-    operator Value() const
-    {
-		return value;
-	}
+    operator Value() const;
 };
 
 struct String
@@ -66,15 +50,9 @@ struct String
 	
     Value value;
 
-    operator Value&()
-    {
-		return value;
-	}
+    operator Value&();
 
-	operator Value() const
-	{
-		return value;
-	}
+	operator Value() const;
 };
 
 struct Id
@@ -83,15 +61,9 @@ struct Id
 	 
     Value value;
 
-    operator Value&()
-    {
-		return value;
-	}
+    operator Value&();
 
-	operator Value()
-	{
-		return value;
-	}
+	operator Value() const;
 };
 
 }

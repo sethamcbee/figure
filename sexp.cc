@@ -4,6 +4,7 @@
 
 #include <variant>
 
+#include "lexer.h"
 #include "sexp.h"
 
 namespace Figure
@@ -60,6 +61,33 @@ Sexp::Sexp(Lexer& l)
 		list.push_back(quote);
 		Sexp quoted{l};
 		list.push_back(quoted);
+	}
+	else if (std::get_if<Backtick>(&tok.value))
+	{
+		value = SexpList{};
+		SexpList& list = std::get<SexpList>(value);
+		Sexp quasiquote{Id{"quasiquote"}, pos};
+		list.push_back(quasiquote);
+		Sexp datum{l};
+		list.push_back(datum);
+	}
+	else if (std::get_if<Comma>(&tok.value))
+	{
+		value = SexpList{};
+		SexpList& list = std::get<SexpList>(value);
+		Sexp unquote{Id{"unquote"}, pos};
+		list.push_back(unquote);
+		Sexp datum{l};
+		list.push_back(datum);
+	}
+	else if (std::get_if<CommaAt>(&tok.value))
+	{
+		value = SexpList{};
+		SexpList& list = std::get<SexpList>(value);
+		Sexp splice{Id{"unquote-splicing"}, pos};
+		list.push_back(splice);
+		Sexp datum{l};
+		list.push_back(datum);
 	}
 	else
 	{

@@ -14,8 +14,11 @@ int main(int argc, char* argv[])
 	// Check if this is interactive.
 	if (argc == 1)
 	{
-		std::cerr << "Interactive shell not supported yet.\n";
-		return 1;
+		Figure::Program program(std::cin);
+		program.print();
+		std::cout << "\nEval:\n======\n";
+		program.eval();
+		return 0;
 	}
 	
     // Verify that an input and output file were provided.

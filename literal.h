@@ -13,30 +13,30 @@ struct Lexer;
 
 struct Bool
 {
-	using Value = bool;
-	
+    using Value = bool;
+
     Value value;
-    
+
     operator Value&();
-    
+
     operator Value() const;
 };
 
 struct Number
 {
-	using Value = double;
-	
+    using Value = double;
+
     Value value;
 
     operator Value&();
 
-	operator Value() const;
+    operator Value() const;
 };
 
 struct Char
 {
-	using Value = char;
-	
+    using Value = char;
+
     Value value;
 
     operator Value&();
@@ -46,24 +46,24 @@ struct Char
 
 struct String
 {
-	using Value = std::string;
-	
+    using Value = std::string;
+
     Value value;
 
     operator Value&();
 
-	operator Value() const;
+    operator Value() const;
 };
 
 struct Id
 {
-	using Value = std::string;
-	 
+    using Value = std::string;
+
     Value value;
 
     operator Value&();
 
-	operator Value() const;
+    operator Value() const;
 };
 
 }

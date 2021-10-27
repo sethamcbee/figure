@@ -10,52 +10,52 @@ namespace Figure
 
 Bool::operator Value&()
 {
-	return value;
+    return value;
 }
 
 Bool::operator Value() const
 {
-	return value;
+    return value;
 }
 
 Number::operator Value&()
 {
-	return value;
+    return value;
 }
 
 Number::operator Value() const
 {
-	return value;
+    return value;
 }
 
 Char::operator Value&()
 {
-	return value;
+    return value;
 }
 
 Char::operator Value() const
 {
-	return value;
+    return value;
 }
 
 String::operator Value&()
 {
-	return value;
+    return value;
 }
 
 String::operator Value() const
 {
-	return value;
+    return value;
 }
 
 Id::operator Value&()
 {
-	return value;
+    return value;
 }
 
 Id::operator Value() const
 {
-	return value;
+    return value;
 }
 
 }

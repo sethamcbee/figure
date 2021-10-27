@@ -11,16 +11,16 @@
 
 int main(int argc, char* argv[])
 {
-	// Check if this is interactive.
-	if (argc == 1)
-	{
-		Figure::Program program(std::cin);
-		program.print();
-		std::cout << "\nEval:\n======\n";
-		program.eval();
-		return 0;
-	}
-	
+    // Check if this is interactive.
+    if (argc == 1)
+    {
+        Figure::Program program(std::cin);
+        program.print();
+        std::cout << "\nEval:\n======\n";
+        program.eval();
+        return 0;
+    }
+
     // Verify that an input and output file were provided.
     if (argc != 2 && argc != 3)
     {

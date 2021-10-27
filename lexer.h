@@ -37,8 +37,8 @@ struct Dot {};
 struct Token
 {
     using Value = std::variant<
-		LEOF, Bool, Char, Number, String, Id, LeftParen, RightParen,
-        Comma, CommaAt, Quote, Backtick, Dot>;
+                  LEOF, Bool, Char, Number, String, Id, LeftParen, RightParen,
+                  Comma, CommaAt, Quote, Backtick, Dot>;
 
     Value value;
     Location pos;
@@ -46,7 +46,7 @@ struct Token
     Token(Value v, Location l) : value(v), pos(l) {}
 
     operator Value&();
-    
+
     operator Value() const;
 };
 
@@ -54,8 +54,8 @@ class Lexer
 {
 public:
 
-	Location pos = 0;
-	Char ch;
+    Location pos = 0;
+    Char ch;
     std::string source;
     std::istream* input;
     std::list<Token> tokens;
@@ -64,7 +64,7 @@ public:
 
     Lexer(std::istream& s);
 
-	void next_token();
+    void next_token();
     Token get_token();
     void push_token(const Token& tok);
     bool good();

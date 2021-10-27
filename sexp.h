@@ -19,18 +19,18 @@ using SexpList = std::list<Sexp>;
 
 struct Sexp
 {
-	using Value = std::variant<LEOF, Bool, Char, Number, String, Id, SexpList>;
+    using Value = std::variant<LEOF, Bool, Char, Number, String, Id, SexpList>;
 
-	Value value;
-	Location pos;
+    Value value;
+    Location pos;
 
-	Sexp(Value v, Location p);
-	Sexp(Lexer& l);
+    Sexp(Value v, Location p);
+    Sexp(Lexer& l);
 
-	void print() const;
+    void print() const;
 
-	void error();
-	void error(std::string_view m);
+    void error();
+    void error(std::string_view m);
 };
 
 }

@@ -17,7 +17,7 @@ namespace Figure
 class Program
 {
 public:
-    
+
     Program(std::istream& input);
 
     void print()

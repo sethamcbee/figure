@@ -6,6 +6,9 @@ LD_INPUT = -lstdc++fs
 RELEASE ?= 0
 PROFILE ?= 0
 
+# Install settings.
+PREFIX ?= ~/.local
+
 OUTPUT = figure
 
 # Check if we are debugging.
@@ -38,8 +41,18 @@ INCLUDE_DIRS = .
 INCLUDE_SCRIPT = $(addprefix -I, $(INCLUDE_DIRS))
 
 # Default target.
+.PHONY: default
+default: all
+
 .PHONY: all
 all: build doc
+
+install: all
+	install -d $(PREFIX)/bin
+	install $(OUTPUT) $(PREFIX)/bin
+
+uninstall:
+	rm $(PREFIX)/bin/$(OUTPUT)
 
 # Remove all generated output.
 .PHONY: clean

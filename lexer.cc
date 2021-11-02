@@ -236,12 +236,16 @@ void Lexer::next_token()
             }
             else
             {
-                error("Invalid character.");
+                std::string err{"Invalid character: "};
+                err += ch;
+                error(err);
             }
         }
         else
         {
-            error("Invalid character.");
+            std::string err{"Invalid character: "};
+            err += ch;
+            error(err);
         }
     }
     // Numbers.

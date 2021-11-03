@@ -47,10 +47,12 @@ default: all
 .PHONY: all
 all: build doc
 
+.PHONY: install
 install: all
 	install -d $(PREFIX)/bin
 	install $(OUTPUT) $(PREFIX)/bin
 
+.PHONY: uninstall
 uninstall:
 	rm $(PREFIX)/bin/$(OUTPUT)
 

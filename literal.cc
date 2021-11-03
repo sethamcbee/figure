@@ -58,4 +58,9 @@ Id::operator Value() const
     return value;
 }
 
+bool Id::operator<(const Id& rhs) const
+{
+    return value < rhs.value;
+}
+
 }

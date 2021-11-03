@@ -29,7 +29,7 @@ struct RightParen {};
 struct VectorParen {};
 struct Comma {};
 struct CommaAt {};
-struct Quote {};
+struct Apostrophe {};
 struct Backtick {};
 struct Dot {};
 
@@ -37,7 +37,7 @@ struct Token
 {
     using Value = std::variant<
                   LEOF, Bool, Char, Number, String, Id, LeftParen,
-                  RightParen, VectorParen, Comma, CommaAt, Quote,
+                  RightParen, VectorParen, Comma, CommaAt, Apostrophe,
                   Backtick, Dot>;
 
     Value value;

@@ -331,7 +331,7 @@ void Lexer::next_token()
     {
         src += ch;
         input->get(ch);
-        Token tok{Quote{}, pos};
+        Token tok{Apostrophe{}, pos};
         tokens.push_back(tok);
     }
     else if (ch == '`')

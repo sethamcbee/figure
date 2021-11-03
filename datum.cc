@@ -161,7 +161,6 @@ void Datum::print() const
     }
     else if (auto p = (DatumList*)std::get_if<DatumPair>(&value))
     {
-        
         std::cout << "(";
         const char* space = "";
         auto last = --p->end();

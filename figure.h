@@ -9,6 +9,8 @@
 #include <string_view>
 
 #include "datum.h"
+#include "env.h"
+#include "exp.h"
 #include "lexer.h"
 #include "sexp.h"
 
@@ -33,9 +35,12 @@ public:
 
 private:
 
+    Env env;
+    Env* ctx;
     Lexer lexer;
     SexpList sexps;
     DatumList data;
+    ExpList exps;
 };
 
 }

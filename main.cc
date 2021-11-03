@@ -16,7 +16,7 @@ int main(int argc, char* argv[])
     {
         Figure::Program program(std::cin);
         program.print();
-        std::cout << "\nEval:\n======\n";
+        std::cout << "=====\nEval:\n=====\n";
         program.eval();
         return 0;
     }
@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
     // Parse and evaluate.
     Figure::Program program(input_file);
     program.print();
-    std::cout << "Eval:\n======\n";
+    std::cout << "\n=====\nEval:\n=====\n";
     program.eval();
 
     // Compile if an output file was specified.

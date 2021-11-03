@@ -67,7 +67,7 @@ Sexp::Sexp(Lexer& l)
             tok = l.get_token();
         }
     }
-    else if (std::get_if<Quote>(&tok.value))
+    else if (std::get_if<Apostrophe>(&tok.value))
     {
         value = SexpList{};
         SexpList& list = std::get<SexpList>(value);

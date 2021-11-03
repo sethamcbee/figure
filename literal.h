@@ -66,6 +66,8 @@ struct Id
     operator Value&();
 
     operator Value() const;
+
+    bool operator<(const Id& rhs) const;
 };
 
 }

@@ -17,10 +17,15 @@
 namespace Figure
 {
 
-class Program
+struct Program
 {
-public:
-
+    Env env;
+    Env* ctx;
+    Lexer lexer;
+    SexpList sexps;
+    DatumList data;
+    ExpList exps;
+    
     Program(std::istream& input);
 
     void print()
@@ -32,15 +37,6 @@ public:
 
     void compile(std::string_view output)
     {}
-
-private:
-
-    Env env;
-    Env* ctx;
-    Lexer lexer;
-    SexpList sexps;
-    DatumList data;
-    ExpList exps;
 };
 
 }

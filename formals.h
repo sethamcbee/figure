@@ -11,7 +11,9 @@
 
 namespace Figure
 {
+
 struct Datum;
+struct Env;
 
 using IdList = std::list<Id>;
 
@@ -27,7 +29,7 @@ struct Formals
     Value value;
 
     Formals();
-    Formals(const Datum& d);
+    Formals(Env& e, const Datum& d);
 
     void print() const;
 };

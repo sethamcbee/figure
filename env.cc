@@ -31,6 +31,7 @@ Env init_env()
 
     env.map[Id{"quote"}] = KeywordQuote{};
     env.map[Id{"lambda"}] = KeywordLambda{};
+    env.map[Id{"if"}] = KeywordIf{};
 
     return env;
 }

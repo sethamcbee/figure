@@ -9,6 +9,11 @@
 namespace Figure
 {
 
+Exp::Exp()
+{
+    value = Bool{false};
+}
+
 Exp::Exp(const Env* ctx, const Datum& d)
 {
     env.parent = ctx;
@@ -52,16 +57,20 @@ Exp::Exp(const Env* ctx, const Datum& d)
         if (auto id = std::get_if<Id>(&first.value))
         {
             auto val = env.get(*id);
-            if (auto kwd = std::get_if<KeywordQuote>(&val))
+            if (std::get_if<KeywordQuote>(&val))
             {
                 // TODO: Check length.
                 auto it = l->begin();
                 ++it;
                 value = Quote{*it};
             }
-            else if (auto kwd = std::get_if<KeywordLambda>(&val))
+            else if (std::get_if<KeywordLambda>(&val))
             {
-                value = Lambda{ctx, d};
+                value = Lambda{env, d};
+            }
+            else if (std::get_if<KeywordIf>(&val))
+            {
+                value = If{env, d};
             }
             else
             {
@@ -111,6 +120,10 @@ void Exp::print() const
     else if (auto lambda = std::get_if<Lambda>(&value))
     {
         lambda->print();
+    }
+    else if (auto if_form = std::get_if<If>(&value))
+    {
+        if_form->print();
     }
 }
 

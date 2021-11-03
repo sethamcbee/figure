@@ -21,7 +21,7 @@ struct Lambda
     Formals formals;
     ExpList bodies;
 
-    Lambda(const Env* e, const Datum& d);
+    Lambda(Env& e, const Datum& d);
 
     void print() const;
 };

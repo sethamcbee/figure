@@ -50,10 +50,8 @@ struct Token
     operator Value() const;
 };
 
-class Lexer
+struct Lexer
 {
-public:
-
     Location pos = 0;
     Char ch;
     std::string source;

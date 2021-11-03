@@ -11,14 +11,14 @@
 namespace Figure
 {
 
-Lambda::Lambda(const Env* e, const Datum& d)
+Lambda::Lambda(Env& e, const Datum& d)
 {
     const auto& l = std::get<DatumList>(d.value);
     auto var = ++l.begin();
-    formals = Formals{*var};
+    formals = Formals{e, *var};
     for (auto body = ++var; body != l.end(); ++body)
     {
-        auto exp = Exp{e, *body};
+        auto exp = Exp{&e, *body};
         bodies.push_back(exp);
     }
 }

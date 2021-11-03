@@ -15,7 +15,7 @@ Formals::Formals()
     value = IdList{};
 }
 
-Formals::Formals(const Datum& d)
+Formals::Formals(Env& e, const Datum& d)
 {
     if (auto id = std::get_if<Id>(&d.value))
     {
@@ -48,7 +48,7 @@ void Formals::print() const
 {
     if (auto id = std::get_if<Id>(&value))
     {
-        std::cout << id;
+        std::cout << id->value;
     }
     else if (auto l = std::get_if<IdList>(&value))
     {

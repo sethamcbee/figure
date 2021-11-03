@@ -37,9 +37,9 @@ Figure::Program::Program(std::istream& input)
     for (const auto & datum : data)
     {
         auto exp = Exp{ctx, datum};
-        ctx = &exp.env;
         exp.print();
         std::cout << std::endl;
         exps.push_back(exp);
+        ctx = &exps.back().env;
     }
 }

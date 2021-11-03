@@ -42,8 +42,12 @@ Exp::Exp(const Env* ctx, const Datum& d)
             std::cerr << "\nInvalid keyword.\n";
             exit(1);
         }
-        else if (auto exp = *std::get_if<Exp*>(&val))
+        else if (auto exp = std::get_if<Exp*>(&val))
         {
+        }
+        else if (auto arg = std::get_if<Arg>(&val))
+        {
+            value = *id;
         }
         else
         {

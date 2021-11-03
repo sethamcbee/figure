@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "datum.h"
+#include "env.h"
 #include "formals.h"
 
 namespace Figure
@@ -19,6 +20,7 @@ Formals::Formals(Env& e, const Datum& d)
 {
     if (auto id = std::get_if<Id>(&d.value))
     {
+        e.map[*id] = Arg{};
         value = *id;
     }
     else if (auto l = std::get_if<DatumList>(&d.value))
@@ -28,6 +30,7 @@ Formals::Formals(Env& e, const Datum& d)
         for (const auto& id : *l)
         {
             auto arg = std::get<Id>(id.value);
+            e.map[arg] = Arg{};
             list.push_back(arg);
         }
     }
@@ -39,6 +42,7 @@ Formals::Formals(Env& e, const Datum& d)
         for (const auto& id : p->value)
         {
             auto arg = std::get<Id>(id.value);
+            e.map[arg] = Arg{};
             list.push_back(arg);
         }
     }

@@ -8,6 +8,7 @@
 #include <string>
 #include <string_view>
 
+#include "datum.h"
 #include "lexer.h"
 #include "sexp.h"
 
@@ -34,6 +35,7 @@ private:
 
     Lexer lexer;
     SexpList sexps;
+    DatumList data;
 };
 
 }

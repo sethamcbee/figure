@@ -9,6 +9,8 @@
 namespace Figure
 {
 
+using Location = size_t;
+
 struct Lexer;
 
 struct Bool

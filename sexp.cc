@@ -53,6 +53,20 @@ Sexp::Sexp(Lexer& l)
             tok = l.get_token();
         }
     }
+    else if (std::get_if<VectorParen>(&tok.value))
+    {
+        value = SexpVector{};
+        SexpVector& vec = std::get<SexpVector>(value);
+        SexpList& list = vec.value;
+        tok = l.get_token();
+        while (!std::get_if<RightParen>(&tok.value))
+        {
+            l.push_token(tok);
+            Sexp element{l};
+            list.push_back(element);
+            tok = l.get_token();
+        }
+    }
     else if (std::get_if<Quote>(&tok.value))
     {
         value = SexpList{};
@@ -89,6 +103,10 @@ Sexp::Sexp(Lexer& l)
         Sexp datum{l};
         list.push_back(datum);
     }
+    else if (std::get_if<Dot>(&tok.value))
+    {
+        value = Id{"."};
+    }
     else
     {
         error("Invalid datum.\n");
@@ -121,7 +139,20 @@ void Sexp::print() const
     {
         std::cout << "(";
         const char* space = "";
-        for (auto sexp : *l)
+        for (const auto& sexp : *l)
+        {
+            std::cout << space;
+            sexp.print();
+            space = " ";
+        }
+        std::cout << ")";
+    }
+    else if (auto v = std::get_if<SexpVector>(&value))
+    {
+        const auto& l = v->value;
+        std::cout << "#(";
+        const char* space = "";
+        for (const auto& sexp : l)
         {
             std::cout << space;
             sexp.print();
@@ -139,7 +170,7 @@ void Sexp::error()
 void Sexp::error(std::string_view msg)
 {
     std::cerr << "\nAt character: " << pos << std::endl;
-    std::cerr << "Datum parsing error: " << msg << std::endl;
+    std::cerr << "S-exp parsing error: " << msg << std::endl;
     exit(1);
 }
 

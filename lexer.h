@@ -23,11 +23,10 @@ bool is_subsequent(Char c);
 bool is_special_subsequent(Char c);
 bool is_line_ending(Char c);
 
-using Location = size_t;
-
 struct LEOF {};
 struct LeftParen {};
 struct RightParen {};
+struct VectorParen {};
 struct Comma {};
 struct CommaAt {};
 struct Quote {};
@@ -37,8 +36,9 @@ struct Dot {};
 struct Token
 {
     using Value = std::variant<
-                  LEOF, Bool, Char, Number, String, Id, LeftParen, RightParen,
-                  Comma, CommaAt, Quote, Backtick, Dot>;
+                  LEOF, Bool, Char, Number, String, Id, LeftParen,
+                  RightParen, VectorParen, Comma, CommaAt, Quote,
+                  Backtick, Dot>;
 
     Value value;
     Location pos;

@@ -17,9 +17,14 @@ struct Sexp;
 
 using SexpList = std::list<Sexp>;
 
+struct SexpVector
+{
+    SexpList value;
+};
+
 struct Sexp
 {
-    using Value = std::variant<LEOF, Bool, Char, Number, String, Id, SexpList>;
+    using Value = std::variant<Bool, Char, Number, String, Id, SexpList, SexpVector>;
 
     Value value;
     Location pos;

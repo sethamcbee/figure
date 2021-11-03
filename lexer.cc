@@ -213,7 +213,7 @@ void Lexer::next_token()
         Token tok{Id{src}, pos};
         tokens.push_back(tok);
     }
-    // Booleans and characters.
+    // Booleans, characters, and vectors.
     else if (ch == '#')
     {
         src += ch;
@@ -231,6 +231,13 @@ void Lexer::next_token()
             {
                 src += ch;
                 Token tok{Bool{true}, pos};
+                tokens.push_back(tok);
+                input->get(ch);
+            }
+            else if (ch == '(')
+            {
+                src += ch;
+                Token tok{VectorParen{}, pos};
                 tokens.push_back(tok);
                 input->get(ch);
             }
@@ -350,6 +357,14 @@ void Lexer::next_token()
             Token tok{Comma{}, pos};
             tokens.push_back(tok);
         }
+    }
+    // Dot.
+    else if (ch == '.')
+    {
+        src += ch;
+        input->get(ch);
+        Token tok{Dot{}, pos};
+        tokens.push_back(tok);
     }
     else
     {

@@ -44,6 +44,7 @@ Exp::Exp(const Env* ctx, const Datum& d)
         }
         else if (auto exp = std::get_if<Exp*>(&val))
         {
+            value = *exp;
         }
         else if (auto arg = std::get_if<Arg>(&val))
         {
@@ -75,6 +76,14 @@ Exp::Exp(const Env* ctx, const Datum& d)
             else if (std::get_if<KeywordIf>(&val))
             {
                 value = If{env, d};
+            }
+            else if (std::get_if<KeywordSet>(&val))
+            {
+                value = Set{env, d};
+            }
+            else if (std::get_if<Exp*>(&val))
+            {
+                value = Proc{env, d}; 
             }
             else
             {
@@ -121,6 +130,10 @@ void Exp::print() const
     {
         quote->print();
     }
+    else if (auto proc = std::get_if<Proc>(&value))
+    {
+        proc->print();
+    }
     else if (auto lambda = std::get_if<Lambda>(&value))
     {
         lambda->print();
@@ -128,6 +141,10 @@ void Exp::print() const
     else if (auto if_form = std::get_if<If>(&value))
     {
         if_form->print();
+    }
+    else if (auto set = std::get_if<Set>(&value))
+    {
+        set->print();
     }
 }
 

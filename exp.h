@@ -12,7 +12,9 @@
 #include "if.h"
 #include "lambda.h"
 #include "literal.h"
+#include "proc.h"
 #include "quote.h"
+#include "set.h"
 
 namespace Figure
 {
@@ -29,8 +31,8 @@ struct ExpPair
 
 struct Exp
 {
-    using Value = std::variant<Bool, Char, Number, String, Id,
-          ExpVector, Quote, Lambda, If>;
+    using Value = std::variant<Bool, Char, Number, String, Id, Exp*,
+          ExpVector, Quote, Proc, Lambda, If, Set>;
 
     Value value;
     Env env;

@@ -23,7 +23,7 @@ struct Env
 {
     using Key = Id;
     using Value = std::variant<
-        KeywordQuote, KeywordLambda, KeywordIf, Arg, Exp*>;
+                  KeywordQuote, KeywordLambda, KeywordIf, Arg, Exp*>;
     using Map = std::map<Key, Value>;
 
     Map map;

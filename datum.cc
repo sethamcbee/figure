@@ -23,6 +23,7 @@ DatumPair::operator DatumList() const
 Datum::Datum()
 {
     value = Bool{false};
+    pos = 0;
 }
 
 Datum::Datum(Value v, Location p, const Sexp* s)

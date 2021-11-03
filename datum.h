@@ -32,7 +32,7 @@ struct DatumPair
 struct Datum
 {
     using Value = std::variant<Bool, Char, Number, String, Id,
-        DatumList, DatumVector, DatumPair>;
+          DatumList, DatumVector, DatumPair>;
 
     Value value;
     Location pos;

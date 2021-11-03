@@ -17,7 +17,7 @@ Exp::Exp()
 Exp::Exp(const Env* ctx, const Datum& d)
 {
     env.parent = ctx;
-    
+
     if (auto b = std::get_if<Bool>(&d.value))
     {
         value = *b;

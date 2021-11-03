@@ -25,7 +25,7 @@ struct Program
     SexpList sexps;
     DatumList data;
     ExpList exps;
-    
+
     Program(std::istream& input);
 
     void print()

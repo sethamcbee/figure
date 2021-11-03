@@ -30,7 +30,7 @@ struct ExpPair
 struct Exp
 {
     using Value = std::variant<Bool, Char, Number, String, Id,
-        ExpVector, Quote, Lambda, If>;
+          ExpVector, Quote, Lambda, If>;
 
     Value value;
     Env env;

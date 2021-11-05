@@ -5,6 +5,7 @@
 #pragma once
 
 #include "literal.h"
+#include "ref.h"
 
 namespace Figure
 {

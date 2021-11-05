@@ -24,14 +24,14 @@ Set::Set(Env& e, const Datum& d)
     id = std::get<Id>(first->value);
     auto second = ++first;
     const auto& datum = *second;
-    auto exp = new Exp{env, datum};
+    auto exp = Ref<Exp>{new Exp{env, datum}};
     env->map[id] = exp;
 }
 
 void Set::print() const
 {
     std::cout << "(set! " << id.value << " ";
-    auto exp = std::get<Exp*>(env->get(id));
+    auto exp = std::get<Ref<Exp>>(env->get(id));
     exp->print();
     std::cout << ")";
 }

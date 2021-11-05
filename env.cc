@@ -20,7 +20,7 @@ Env::Value Env::get(const Key& k) const
     }
     else
     {
-        Exp* ret{nullptr};
+        Ref<Exp> ret{nullptr};
         return ret;
     }
 }

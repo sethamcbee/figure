@@ -8,6 +8,7 @@
 #include <variant>
 
 #include "literal.h"
+#include "ref.h"
 
 namespace Figure
 {
@@ -25,7 +26,7 @@ struct Env
     using Key = Id;
     using Value = std::variant<
         KeywordQuote, KeywordLambda, KeywordIf, KeywordSet, Arg,
-        Exp*>;
+        Ref<Exp>>;
     using Map = std::map<Key, Value>;
 
     Map map;

@@ -14,6 +14,7 @@
 #include "literal.h"
 #include "proc.h"
 #include "quote.h"
+#include "ref.h"
 #include "set.h"
 
 namespace Figure
@@ -31,7 +32,7 @@ struct ExpPair
 
 struct Exp
 {
-    using Value = std::variant<Bool, Char, Number, String, Id, Exp*,
+    using Value = std::variant<Bool, Char, Number, String, Id, Ref<Exp>,
           ExpVector, Quote, Proc, Lambda, If, Set>;
 
     Value value;

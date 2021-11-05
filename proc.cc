@@ -15,7 +15,7 @@ Proc::Proc(Env& e, const Datum& d)
     env = &e;
     const auto& l = std::get<DatumList>(d.value);
     auto first = l.begin();
-    op.reset(new Exp{env, *first});
+    op = Ref<Exp>{new Exp{env, *first}};
     for (auto datum = first; datum != l.end(); ++datum)
     {
         auto exp = Exp{env, *datum};
@@ -26,7 +26,7 @@ Proc::Proc(Env& e, const Datum& d)
 void Proc::print() const
 {
     std::cout << "(";
-    const auto& op_exp = std::get<Exp*>(op->value);
+    const auto& op_exp = std::get<Ref<Exp>>(op->value);
     const auto& lam = std::get<Lambda>(op_exp->value);
     lam.print();
     for (const auto& exp : args)

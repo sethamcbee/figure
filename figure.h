@@ -12,6 +12,7 @@
 #include "env.h"
 #include "exp.h"
 #include "lexer.h"
+#include "ref.h"
 #include "sexp.h"
 
 namespace Figure

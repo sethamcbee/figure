@@ -42,7 +42,7 @@ Exp::Exp(const Env* ctx, const Datum& d)
             std::cerr << "\nInvalid keyword.\n";
             exit(1);
         }
-        else if (auto exp = std::get_if<Exp*>(&val))
+        else if (auto exp = std::get_if<Ref<Exp>>(&val))
         {
             value = *exp;
         }
@@ -81,7 +81,7 @@ Exp::Exp(const Env* ctx, const Datum& d)
             {
                 value = Set{env, d};
             }
-            else if (std::get_if<Exp*>(&val))
+            else if (std::get_if<Ref<Exp>>(&val))
             {
                 value = Proc{env, d}; 
             }

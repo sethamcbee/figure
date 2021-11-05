@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "literal.h"
+#include "ref.h"
 
 namespace Figure
 {
@@ -18,7 +19,7 @@ struct Datum;
 struct Proc
 {
     Env* env = nullptr;
-    std::shared_ptr<Exp> op = nullptr;
+    Ref<Exp> op = nullptr;
     ExpList args;
 
     Proc(Env& e, const Datum& d);

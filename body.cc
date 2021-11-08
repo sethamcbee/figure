@@ -39,7 +39,7 @@ void Body::print(std::ostream& o) const
     sequence->print(o);
 }
 
-Ref<Exp> make_body(
+Ref<Body> make_body(
     Env& env, DatumList::const_iterator begin,
     DatumList::const_iterator end)
 {

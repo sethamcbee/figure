@@ -12,7 +12,7 @@ DefineVar::DefineVar(Env& env, const Datum& datum)
 {
     source = &datum;
     const auto& l = std::get<DatumList>(datum.value);
-    
+
     auto kwd = l.begin();
     keyword = std::get<Id>(kwd->value);
 

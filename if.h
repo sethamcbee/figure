@@ -25,8 +25,8 @@ struct If : public Exp
 
     virtual void print(std::ostream& o) const;
 
-    virtual void error() const;
-    virtual void error(const std::string& err) const;
+    void error() const;
+    void error(const std::string& err) const;
 };
 
 Ref<Exp> make_if(Env& env, const Datum& datum);

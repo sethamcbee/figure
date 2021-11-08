@@ -20,7 +20,7 @@ class Datum;
 template <class T>
 struct Atom : public Exp
 {
-    const Datum* source;
+    const Datum* source = nullptr;
 
     T value;
 

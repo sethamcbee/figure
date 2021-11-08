@@ -20,6 +20,14 @@ Sequence::Sequence(
         ++it;
     }
     expression = make_exp(env, *last);
+    if (!expression)
+    {
+        std::cerr << "At character: " << last->pos << std::endl;
+        std::cerr << "At datum: ";
+        last->print(std::cerr);
+        std::cerr << "\nError processing sequence.\n";
+        exit(1);
+    }
 }
 
 void Sequence::print(std::ostream& o) const

@@ -19,8 +19,7 @@ Body::Body(
     auto last = std::prev(end);
     while (it != last && is_definition(*it))
     {
-        const auto& l = std::get<DatumList>(it->value);
-        auto def = make_definition(env, l);
+        auto def = make_definition(env, *it);
         definitions.push_back(def);
         ++it;
     }

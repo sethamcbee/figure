@@ -8,9 +8,12 @@
 namespace Figure
 {
 
-DefineVar::DefineVar(Env& env, const DatumList& datum)
+DefineVar::DefineVar(Env& env, const Datum& datum)
 {
-    auto kwd = datum.begin();
+    source = &datum;
+    const auto& l = std::get<DatumList>(datum.value);
+    
+    auto kwd = l.begin();
     keyword = std::get<Id>(kwd->value);
 
     auto id = std::next(kwd);
@@ -18,7 +21,15 @@ DefineVar::DefineVar(Env& env, const DatumList& datum)
 
     auto exp = std::next(id);
     expression = make_exp(env, *exp);
-    env.set(identifier, expression);
+    if (expression)
+    {
+        env.bind(identifier, expression);
+    }
+    else
+    {
+        error("Error parsing sub-expression.");
+        exit(1);
+    }
 }
 
 void DefineVar::print(std::ostream& o) const
@@ -28,9 +39,28 @@ void DefineVar::print(std::ostream& o) const
     o << ")";
 }
 
-Ref<Exp> make_definition(Env& env, const DatumList& datum)
+void DefineVar::error() const
 {
-    auto kwd = datum.begin();
+    error("Unspecified error.");
+}
+
+void DefineVar::error(const std::string& err) const
+{
+    if (source)
+    {
+        std::cerr << "At character: " << source->pos << std::endl;
+        std::cerr << "At datum: ";
+        source->print(std::cerr);
+        std::cerr << std::endl;
+    }
+    std::cerr << "Error parsing variable definition: ";
+    std::cerr << err << std::endl;
+}
+
+Ref<Exp> make_definition(Env& env, const Datum& datum)
+{
+    const auto& l = std::get<DatumList>(datum.value);
+    auto kwd = l.begin();
     auto keyword = std::get<Id>(kwd->value);
     if (keyword.value == "define")
     {

@@ -31,10 +31,11 @@ struct Env
     using Map = std::map<Key, Value>;
 
     Map map;
-    const Env* parent = nullptr;
+    Env* parent = nullptr;
 
     Value get(const Key& k) const;
     void set(const Key& k, const Value& v);
+    void bind(const Key& k, const Value& v);
 };
 
 Env init_env();

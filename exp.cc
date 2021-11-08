@@ -65,7 +65,7 @@ Ref<Exp> make_exp(Env& env, const Datum& datum)
         {
             if (auto val = *exp)
             {
-                return val;
+                return make_atom<Id>(*id);
             }
             else
             {

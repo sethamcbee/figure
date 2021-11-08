@@ -9,6 +9,7 @@ namespace Figure
 
 If::If(Env& env, const Datum& datum)
 {
+    source = &datum;
     const auto& l = std::get<DatumList>(datum.value);
     auto sz = l.size();
     if (sz != 3 && sz != 4)
@@ -23,14 +24,29 @@ If::If(Env& env, const Datum& datum)
 
     auto t = ++kwd;
     test = make_exp(env, *t);
+    if (!test)
+    {
+        error("Error parsing conditional expression.");
+        exit(1);
+    }
 
     auto c = ++t;
     consequent = make_exp(env, *c);
+    if (!consequent)
+    {
+        error("Error parsing consequent expression.");
+        exit(1);
+    }
 
     auto a = ++c;
     if (a != l.end())
     {
         alternate = make_exp(env, *a);
+        if (!alternate)
+        {
+            error("Error parsing alternate expression.");
+            exit(1);
+        }
     }
 }
 

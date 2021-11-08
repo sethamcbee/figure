@@ -30,7 +30,7 @@ Set::Set(Env& env, const Datum& datum)
 
     auto exp = std::next(id);
     expression = make_exp(env, *exp);
-    env.set(identifier, expression);
+    //env.set(identifier, expression);
 }
 
 void Set::print(std::ostream& o) const

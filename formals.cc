@@ -18,7 +18,7 @@ Formals::Formals(Env& env, const Datum& datum)
     {
         value = *id;
         auto arg = Arg{};
-        env.set(*id, arg);
+        env.bind(*id, arg);
     }
     else if (auto l = std::get_if<DatumList>(&datum.value))
     {
@@ -29,7 +29,7 @@ Formals::Formals(Env& env, const Datum& datum)
         {
             const auto& id = std::get<Id>(datum.value);
             list.push_back(id);
-            env.set(id, arg);
+            env.bind(id, arg);
         }
     }
     else if (auto p = std::get_if<DatumPair>(&datum.value))
@@ -42,7 +42,7 @@ Formals::Formals(Env& env, const Datum& datum)
         {
             const auto& id = std::get<Id>(datum.value);
             list.push_back(id);
-            env.set(id, arg);
+            env.bind(id, arg);
         }
     }
 }

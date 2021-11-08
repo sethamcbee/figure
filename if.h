@@ -15,7 +15,7 @@ struct Env;
 
 struct If : public Exp
 {
-    Datum* source = nullptr;
+    const Datum* source = nullptr;
     Id keyword;
     Ref<Exp> test;
     Ref<Exp> consequent;

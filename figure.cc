@@ -30,8 +30,7 @@ Program::Program(std::istream& input)
         Ref<Exp> exp;
         if (is_definition(datum))
         {
-            const auto& list = std::get<DatumList>(datum.value);
-            exp = make_definition(env, list);
+            exp = make_definition(env, datum);
         }
         else
         {
@@ -78,8 +77,7 @@ void Program::repl()
         Ref<Exp> exp;
         if (is_definition(datum))
         {
-            const auto& list = std::get<DatumList>(datum.value);
-            exp = make_definition(env, list);
+            exp = make_definition(env, datum);
         }
         else
         {

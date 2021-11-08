@@ -84,7 +84,7 @@ void If::error(const std::string& err) const
     std::cerr << err << std::endl;
 }
 
-Ref<Exp> make_if(Env& env, const Datum& datum)
+Ref<If> make_if(Env& env, const Datum& datum)
 {
     If tmp{env, datum};
     return make_ref(tmp);

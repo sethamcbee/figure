@@ -29,6 +29,6 @@ struct If : public Exp
     void error(const std::string& err) const;
 };
 
-Ref<Exp> make_if(Env& env, const Datum& datum);
+Ref<If> make_if(Env& env, const Datum& datum);
 
 }

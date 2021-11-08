@@ -28,9 +28,9 @@ Ref<Exp> Exp::eval(const Env& env) const
     return nullptr;
 }
 
-void Exp::error()
+void Exp::error() const
 {
-    std::cout << "Error parsing Exp.\n";
+    std::cerr << "Error parsing Exp.\n";
 }
 
 Ref<Exp> make_exp(Env& env, const Datum& datum)
@@ -128,6 +128,12 @@ Ref<Exp> make_exp(Env& env, const Datum& datum)
         else if (std::get_if<KeywordSet>(&val))
         {
             return make_set(env, *l);
+        }
+        else if (std::get_if<KeywordDefine>(&val))
+        {
+            Exp err;
+            err.error();
+            exit(1);
         }
         else
         {

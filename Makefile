@@ -87,6 +87,17 @@ test: $(OUTPUT)
 run: $(OUTPUT)
 	./$(OUTPUT) test/test.scm build/test.cc
 
+# Code::Blocks targets.
+.PHONY: Debug
+Debug: $(OUTPUT) doc
+	mkdir -p Debug
+	cp $(OUTPUT) ./Debug/$(OUTPUT)
+
+.PHONY: Release
+Release: $(OUTPUT) doc
+	mkdir -p Release
+	cp $(OUTPUT) ./Release/$(OUTPUT)
+
 .PHONY: build
 build: $(OUTPUT)
 

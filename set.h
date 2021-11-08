@@ -21,7 +21,7 @@ struct Set : public Exp
 
     Set(Env& env, const DatumList& l);
 
-    virtual void print() const;
+    virtual void print(std::ostream& o) const;
 };
 
 Ref<Exp> make_set(Env& env, const DatumList& l);

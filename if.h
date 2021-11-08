@@ -22,7 +22,7 @@ struct If : public Exp
 
     If(Env&, const DatumList& l);
 
-    virtual void print() const;
+    virtual void print(std::ostream& o) const;
 };
 
 Ref<Exp> make_if(Env& env, const DatumList& l);

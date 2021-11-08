@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <iostream>
 #include <list>
 #include <string_view>
 #include <variant>
@@ -42,7 +43,7 @@ struct Datum
     Datum(Value v, Location p, const Sexp* s);
     Datum(const Sexp& s);
 
-    void print() const;
+    void print(std::ostream& o) const;
 
     void error();
     void error(std::string_view e);

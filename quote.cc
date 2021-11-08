@@ -2,7 +2,7 @@
  * @file quote.cc
  */
 
-#include <quote.h>
+#include "quote.h"
 
 namespace Figure
 {
@@ -15,10 +15,10 @@ Quote::Quote(const DatumList& l)
     quoted = *datum;
 }
 
-void Quote::print() const
+void Quote::print(std::ostream& o) const
 {
-    std::cout << "'";
-    quoted.print();
+    o << "'";
+    quoted.print(o);
 }
 
 Ref<Exp> make_quote(const DatumList& l)

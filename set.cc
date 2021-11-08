@@ -30,11 +30,11 @@ Set::Set(Env& env, const DatumList& l)
     env.set(identifier, expression);
 }
 
-void Set::print() const
+void Set::print(std::ostream& o) const
 {
-    std::cout << "(" << keyword << " " << identifier << " ";
-    expression->print();
-    std::cout << ")";
+    o << "(" << keyword << " " << identifier << " ";
+    expression->print(o);
+    o << ")";
 }
 
 Ref<Exp> make_set(Env& env, const DatumList& l)

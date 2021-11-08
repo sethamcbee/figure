@@ -2,6 +2,8 @@
  * @file body.cc
  */
 
+#include <iostream>
+
 #include "body.h"
 #include "definition.h"
 #include "sequence.h"
@@ -25,17 +27,17 @@ Body::Body(
     sequence = make_sequence(env, it, end);
 }
 
-void Body::print() const
+void Body::print(std::ostream& o) const
 {
     const char* space = "";
     for (auto def : definitions)
     {
-        std::cout << space;
-        def->print();
+        o << space;
+        def->print(o);
         space = " ";
     }
-    std::cout << space;
-    sequence->print();
+    o << space;
+    sequence->print(o);
 }
 
 Ref<Exp> make_body(

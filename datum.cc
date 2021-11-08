@@ -126,70 +126,70 @@ Datum::Datum(const Sexp& s)
     }
 }
 
-void Datum::print() const
+void Datum::print(std::ostream& o) const
 {
     if (auto id = std::get_if<Id>(&value))
     {
-        std::cout << id->value;
+        o << id->value;
     }
     else if (auto b = std::get_if<Bool>(&value))
     {
-        std::cout << b->value;
+        o << b->value;
     }
     else if (auto n = std::get_if<Number>(&value))
     {
-        std::cout << n->value;
+        o << n->value;
     }
     else if (auto c = std::get_if<Char>(&value))
     {
-        std::cout << c->value;
+        o << c->value;
     }
     else if (auto s = std::get_if<String>(&value))
     {
-        std::cout << "\"" << s->value << "\"";
+        o << "\"" << s->value << "\"";
     }
     else if (auto l = std::get_if<DatumList>(&value))
     {
-        std::cout << "(";
+        o << "(";
         const char* space = "";
         for (const auto& datum : *l)
         {
-            std::cout << space;
-            datum.print();
+            o << space;
+            datum.print(o);
             space = " ";
         }
-        std::cout << ")";
+        o << ")";
     }
     else if (auto p = (DatumList*)std::get_if<DatumPair>(&value))
     {
-        std::cout << "(";
+        o << "(";
         const char* space = "";
         auto last = --p->end();
         for (auto datum = p->begin(); datum != last; ++datum)
         {
-            std::cout << space;
-            datum->print();
+            o << space;
+            datum->print(o);
             space = " ";
         }
-        std::cout << " . ";
-        last->print();
-        std::cout << ")";
+        o << " . ";
+        last->print(o);
+        o << ")";
     }
     else if (auto v = std::get_if<DatumVector>(&value))
     {
-        std::cout << "#(";
+        o << "#(";
         const char* space = "";
         for (const auto& datum : *v)
         {
-            std::cout << space;
-            datum.print();
+            o << space;
+            datum.print(o);
             space = " ";
         }
-        std::cout << ")";
+        o << ")";
     }
     else
     {
-        std::cout << "[unprintable]";
+        o << "[unprintable]";
     }
 }
 
@@ -203,7 +203,7 @@ void Datum::error(std::string_view e)
     if (src)
     {
         std::cerr << "\nAt s-exp: ";
-        src->print();
+        src->print(std::cerr);
     }
     std::cerr << "\nDatum parsing error: " << e << std::endl;
     exit(1);

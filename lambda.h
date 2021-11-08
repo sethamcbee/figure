@@ -22,7 +22,7 @@ struct Lambda : public Exp
 
     Lambda(Env& e, const DatumList& l);
 
-    virtual void print() const;
+    virtual void print(std::ostream& o) const;
 };
 
 Ref<Exp> make_lambda(Env& e, const DatumList& l);

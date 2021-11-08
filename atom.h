@@ -24,7 +24,7 @@ struct Atom : public Exp
 
     Atom(const T& v);
 
-    virtual void print() const;
+    virtual void print(std::ostream& o) const;
 };
 
 template <class T>
@@ -34,9 +34,9 @@ Atom<T>::Atom(const T& v)
 }
 
 template <class T>
-void Atom<T>::print() const
+void Atom<T>::print(std::ostream& o) const
 {
-    std::cout << value;
+    o << value;
 }
 
 template <class T>

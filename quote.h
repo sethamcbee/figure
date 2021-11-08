@@ -16,7 +16,7 @@ struct Quote : public Exp
 
     Quote(const DatumList& l);
 
-    virtual void print() const;
+    virtual void print(std::ostream& o) const;
 };
 
 Ref<Exp> make_quote(const DatumList& l);

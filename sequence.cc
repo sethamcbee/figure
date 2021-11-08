@@ -22,17 +22,17 @@ Sequence::Sequence(
     expression = make_exp(env, *last);
 }
 
-void Sequence::print() const
+void Sequence::print(std::ostream& o) const
 {
     const char* space = "";
     for (const auto& cmd : commands)
     {
-        std::cout << space;
-        cmd->print();
+        o << space;
+        cmd->print(o);
         space = " ";
     }
-    std::cout << space;
-    expression->print();
+    o << space;
+    expression->print(o);
 }
 
 Ref<Exp> make_sequence(

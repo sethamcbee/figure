@@ -7,12 +7,15 @@
 #include "figure.h"
 #include "lexer.h"
 
-Figure::Program::Program(std::istream& input)
+namespace Figure
+{
+
+Program::Program(std::istream& input)
 {
     env = init_env();
     ctx = &env;
 
-    lexer = Figure::Lexer(input);
+    lexer = Lexer(input);
     while (lexer.good())
     {
         auto sexp = Sexp{lexer};
@@ -22,7 +25,7 @@ Figure::Program::Program(std::istream& input)
     std::cout << "=====\nsexp:\n=====\n";
     for (const auto& sexp : sexps)
     {
-        sexp.print();
+        sexp.print(std::cout);
         std::cout << std::endl;
     }
 
@@ -30,7 +33,7 @@ Figure::Program::Program(std::istream& input)
     for (const auto& sexp : sexps)
     {
         auto datum = Datum{sexp};
-        datum.print();
+        datum.print(std::cout);
         std::cout << std::endl;
         data.push_back(datum);
     }
@@ -47,8 +50,68 @@ Figure::Program::Program(std::istream& input)
         {
             exp = make_command(env, datum);
         }
-        exp->print();
-        std::cout << std::endl;
         exps.push_back(exp);
     }
+}
+
+void Program::print()
+{
+    for (const auto& exp : exps)
+    {
+        exp->print(std::cout);
+        std::cout << std::endl;
+    }
+}
+
+void Program::eval()
+{
+    for (const auto& exp : exps)
+    {
+        auto ret = exp->eval(env);
+        if (ret)
+        {
+            ret->print(std::cout);
+        }
+    }
+}
+
+void Program::repl()
+{
+    auto env = init_env();
+    auto lexer = Lexer{std::cin};
+    auto sexps = std::list<Sexp>{};
+    auto data = std::list<Datum>{};
+    auto exps = std::list<Ref<Exp>>{};
+    while (lexer.good())
+    {
+        auto sexp = Sexp{lexer};
+        sexps.push_back(sexp);
+        auto datum = Datum{sexp};
+        data.push_back(datum);
+        Ref<Exp> exp;
+        if (is_definition(datum))
+        {
+            const auto& list = std::get<DatumList>(datum.value);
+            exp = make_definition(env, list);
+        }
+        else
+        {
+            exp = make_command(env, datum);
+        }
+        exps.push_back(exp);
+        exp->print(std::cout);
+        std::cout << std::endl;
+        auto ret = exp->eval(env);
+        if (ret)
+        {
+            ret->print(std::cout);
+        }
+    }
+}
+
+void Program::compile(std::string_view output)
+{
+    // Stub.
+}
+
 }

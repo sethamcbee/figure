@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <iostream>
 #include <list>
 #include <variant>
 
@@ -32,7 +33,7 @@ struct Sexp
     Sexp(Value v, Location p);
     Sexp(Lexer& l);
 
-    void print() const;
+    void print(std::ostream& o) const;
 
     void error();
     void error(std::string_view m);

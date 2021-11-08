@@ -21,11 +21,11 @@ DefineVar::DefineVar(Env& env, const DatumList& datum)
     env.set(identifier, expression);
 }
 
-void DefineVar::print() const
+void DefineVar::print(std::ostream& o) const
 {
-    std::cout << "(" << keyword << " " << identifier << " ";
-    expression->print();
-    std::cout << ")";
+    o << "(" << keyword << " " << identifier << " ";
+    expression->print(o);
+    o << ")";
 }
 
 Ref<Exp> make_definition(Env& env, const DatumList& datum)

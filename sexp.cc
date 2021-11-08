@@ -113,52 +113,52 @@ Sexp::Sexp(Lexer& l)
     }
 }
 
-void Sexp::print() const
+void Sexp::print(std::ostream& o) const
 {
     if (auto id = std::get_if<Id>(&value))
     {
-        std::cout << id->value;
+        o << id->value;
     }
     else if (auto b = std::get_if<Bool>(&value))
     {
-        std::cout << b->value;
+        o << b->value;
     }
     else if (auto n = std::get_if<Number>(&value))
     {
-        std::cout << n->value;
+        o << n->value;
     }
     else if (auto c = std::get_if<Char>(&value))
     {
-        std::cout << c->value;
+        o << c->value;
     }
     else if (auto s = std::get_if<String>(&value))
     {
-        std::cout << "\"" << s->value << "\"";
+        o << "\"" << s->value << "\"";
     }
     else if (auto l = std::get_if<SexpList>(&value))
     {
-        std::cout << "(";
+        o << "(";
         const char* space = "";
         for (const auto& sexp : *l)
         {
-            std::cout << space;
-            sexp.print();
+            o << space;
+            sexp.print(o);
             space = " ";
         }
-        std::cout << ")";
+        o << ")";
     }
     else if (auto v = std::get_if<SexpVector>(&value))
     {
         const auto& l = v->value;
-        std::cout << "#(";
+        o << "#(";
         const char* space = "";
         for (const auto& sexp : l)
         {
-            std::cout << space;
-            sexp.print();
+            o << space;
+            sexp.print(o);
             space = " ";
         }
-        std::cout << ")";
+        o << ")";
     }
 }
 

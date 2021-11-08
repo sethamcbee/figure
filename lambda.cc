@@ -24,13 +24,13 @@ Lambda::Lambda(Env& e, const DatumList& l)
     body = make_body(env, body_begin, body_end);
 }
 
-void Lambda::print() const
+void Lambda::print(std::ostream& o) const
 {
-    std::cout << "(" << keyword << " ";
-    formals.print();
-    std::cout << " ";
-    body->print();
-    std::cout << ")";
+    o << "(" << keyword << " ";
+    formals.print(o);
+    o << " ";
+    body->print(o);
+    o << ")";
 }
 
 Ref<Exp> make_lambda(Env& e, const DatumList& l)

@@ -26,20 +26,20 @@ If::If(Env& env, const DatumList& l)
     }
 }
 
-void If::print() const
+void If::print(std::ostream& o) const
 {
-    std::cout << "(";
-    std::cout << keyword;
-    std::cout << " ";
-    test->print();
-    std::cout << " ";
-    consequent->print();
+    o << "(";
+    o << keyword;
+    o << " ";
+    test->print(o);
+    o << " ";
+    consequent->print(o);
     if (alternate)
     {
         std::cout << " ";
-        alternate->print();
+        alternate->print(o);
     }
-    std::cout << ")";
+    o << ")";
 }
 
 Ref<Exp> make_if(Env& env, const DatumList& l)

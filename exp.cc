@@ -18,9 +18,14 @@
 namespace Figure
 {
 
-void Exp::print() const
+void Exp::print(std::ostream& o) const
 {
-    std::cout << "[default exp]";
+    o << "[default exp]";
+}
+
+Ref<Exp> Exp::eval(const Env& env) const
+{
+    return nullptr;
 }
 
 void Exp::error()

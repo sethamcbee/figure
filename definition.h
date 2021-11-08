@@ -24,7 +24,7 @@ struct DefineVar : public Definition
 
     DefineVar(Env& env, const DatumList& datum);
 
-    virtual void print() const;
+    virtual void print(std::ostream& o) const;
 };
 
 Ref<Exp> make_definition(Env& env, const DatumList& datum);

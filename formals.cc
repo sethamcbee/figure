@@ -47,37 +47,37 @@ Formals::Formals(Env& env, const Datum& datum)
     }
 }
 
-void Formals::print() const
+void Formals::print(std::ostream& o) const
 {
     if (auto id = std::get_if<Id>(&value))
     {
-        std::cout << *id;
+        o << *id;
     }
     else if (auto l = std::get_if<IdList>(&value))
     {
-        std::cout << "(";
+        o << "(";
         const char* space = "";
         for (const auto& id : *l)
         {
-            std::cout << space << id;
+            o << space << id;
             space = " ";
         }
-        std::cout << ")";
+        o << ")";
     }
     else if (auto p = std::get_if<IdPair>(&value))
     {
         const auto& l = p->value;
         auto last = --l.end();
-        std::cout << "(";
+        o << "(";
         const char* space = "";
         for (auto id = l.begin(); id != last; ++id)
         {
-            std::cout << space << *id;
+            o << space << *id;
             space = " ";
         }
-        std::cout << " . ";
-        std::cout << *last;
-        std::cout << ")";
+        o << " . ";
+        o << *last;
+        o << ")";
     }
 }
 

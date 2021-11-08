@@ -24,7 +24,7 @@ struct Body : Exp
         Env& env, DatumList::const_iterator begin,
         DatumList::const_iterator end);
 
-    void print() const;
+    void print(std::ostream& o) const;
 };
 
 Ref<Exp> make_body(

@@ -31,15 +31,13 @@ struct Program
 
     Program(std::istream& input);
 
-    void print()
-    {
-    }
+    void print();
 
-    void eval()
-    {}
+    void eval();
 
-    void compile(std::string_view output)
-    {}
+    static void repl();
+
+    void compile(std::string_view output);
 };
 
 }

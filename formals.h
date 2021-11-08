@@ -33,7 +33,7 @@ struct Formals : public Exp
     Formals();
     Formals(Env& env, const Datum& datum);
 
-    void print() const;
+    void print(std::ostream& o) const;
 };
 
 }

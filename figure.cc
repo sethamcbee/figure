@@ -66,9 +66,9 @@ void Program::repl()
 {
     auto env = init_env();
     auto lexer = Lexer{std::cin};
-    auto sexps = std::list<Sexp>{};
-    auto data = std::list<Datum>{};
-    auto exps = std::list<Ref<Exp>>{};
+    auto sexps = std::list<Sexp> {};
+    auto data = std::list<Datum> {};
+    auto exps = std::list<Ref<Exp>> {};
     while (lexer.good())
     {
         auto sexp = Sexp{lexer};

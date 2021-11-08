@@ -7,18 +7,26 @@
 namespace Figure
 {
 
-If::If(Env& env, const DatumList& l)
+If::If(Env& env, const Datum& datum)
 {
+    const auto& l = std::get<DatumList>(datum.value);
+    auto sz = l.size();
+    if (sz != 3 && sz != 4)
+    {
+        error("Invalid argument count.");
+        exit(1);
+    }
+
     auto kwd = l.begin();
     const auto& id = std::get<Id>(kwd->value);
     keyword = id;
-    
+
     auto t = ++kwd;
     test = make_exp(env, *t);
-    
+
     auto c = ++t;
     consequent = make_exp(env, *c);
-    
+
     auto a = ++c;
     if (a != l.end())
     {
@@ -42,9 +50,27 @@ void If::print(std::ostream& o) const
     o << ")";
 }
 
-Ref<Exp> make_if(Env& env, const DatumList& l)
+void If::error() const
 {
-    If tmp{env, l};
+    error("Unspecified error.");
+}
+
+void If::error(const std::string& err) const
+{
+    if (source)
+    {
+        std::cerr << "At character: " << source->pos << std::endl;
+        std::cerr << "At datum: ";
+        source->print(std::cerr);
+        std::cerr << std::endl;
+    }
+    std::cerr << "Error parsing if expression: ";
+    std::cerr << err << std::endl;
+}
+
+Ref<Exp> make_if(Env& env, const Datum& datum)
+{
+    If tmp{env, datum};
     return make_ref(tmp);
 }
 

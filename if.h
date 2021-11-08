@@ -15,16 +15,20 @@ struct Env;
 
 struct If : public Exp
 {
+    Datum* source = nullptr;
     Id keyword;
     Ref<Exp> test;
     Ref<Exp> consequent;
     Ref<Exp> alternate;
 
-    If(Env&, const DatumList& l);
+    If(Env&, const Datum& datum);
 
     virtual void print(std::ostream& o) const;
+
+    virtual void error() const;
+    virtual void error(const std::string& err) const;
 };
 
-Ref<Exp> make_if(Env& env, const DatumList& l);
+Ref<Exp> make_if(Env& env, const Datum& datum);
 
 }

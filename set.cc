@@ -8,8 +8,11 @@
 namespace Figure
 {
 
-Set::Set(Env& env, const DatumList& l)
+Set::Set(Env& env, const Datum& datum)
 {
+    source = &datum;
+    const auto& l = std::get<DatumList>(datum.value);
+
     auto kwd = l.begin();
     keyword = std::get<Id>(kwd->value);
 
@@ -20,7 +23,7 @@ Set::Set(Env& env, const DatumList& l)
     {
         if (!*ref)
         {
-            error();
+            error("Variable not previously defined.");
             exit(1);
         }
     }
@@ -37,9 +40,27 @@ void Set::print(std::ostream& o) const
     o << ")";
 }
 
-Ref<Exp> make_set(Env& env, const DatumList& l)
+void Set::error() const
 {
-    Set tmp{env, l};
+    error("Unspecified error.");
+}
+
+void Set::error(const std::string& err) const
+{
+    if (source)
+    {
+        std::cerr << "At character: " << source->pos << std::endl;
+        std::cerr << "At datum: ";
+        source->print(std::cerr);
+        std::cerr << std::endl;
+    }
+    std::cerr << "Error parsing set! expression: ";
+    std::cerr << err << std::endl;
+}
+
+Ref<Exp> make_set(Env& env, const Datum& datum)
+{
+    Set tmp{env, datum};
     return make_ref(tmp);
 }
 

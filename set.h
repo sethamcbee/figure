@@ -15,15 +15,19 @@ struct Env;
 
 struct Set : public Exp
 {
+    const Datum* source;
     Id keyword;
     Id identifier;
     Ref<Exp> expression;
 
-    Set(Env& env, const DatumList& l);
+    Set(Env& env, const Datum& l);
 
     virtual void print(std::ostream& o) const;
+
+    virtual void error() const;
+    virtual void error(const std::string& err) const;
 };
 
-Ref<Exp> make_set(Env& env, const DatumList& l);
+Ref<Exp> make_set(Env& env, const Datum& datum);
 
 }

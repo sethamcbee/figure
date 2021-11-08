@@ -8,9 +8,16 @@
 namespace Figure
 {
 
-Lambda::Lambda(Env& e, const DatumList& l)
+Lambda::Lambda(Env& e, const Datum& datum)
 {
+    source = &datum;
     env.parent = &e;
+    const auto& l = std::get<DatumList>(datum.value);
+    if (l.size() < 3)
+    {
+        error("Invalid argument count.");
+        exit(1);
+    }
 
     auto kwd = l.begin();
     const auto& id = std::get<Id>(kwd->value);
@@ -33,9 +40,27 @@ void Lambda::print(std::ostream& o) const
     o << ")";
 }
 
-Ref<Exp> make_lambda(Env& e, const DatumList& l)
+void Lambda::error() const
 {
-    Lambda tmp{e, l};
+    error("Unspecified error.");
+}
+
+void Lambda::error(const std::string& err) const
+{
+    if (source)
+    {
+        std::cerr << "At character: " << source->pos << std::endl;
+        std::cerr << "At datum: ";
+        source->print(std::cerr);
+        std::cerr << std::endl;
+    }
+    std::cerr << "Error parsing lambda expression: ";
+    std::cerr << err << std::endl;
+}
+
+Ref<Exp> make_lambda(Env& e, const Datum& datum)
+{
+    Lambda tmp{e, datum};
     return make_ref(tmp);
 }
 

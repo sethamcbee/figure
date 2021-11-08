@@ -20,6 +20,8 @@ class Datum;
 template <class T>
 struct Atom : public Exp
 {
+    const Datum* source;
+
     T value;
 
     Atom(const T& v);
@@ -40,23 +42,22 @@ void Atom<T>::print(std::ostream& o) const
 }
 
 template <class T>
-auto make_atom(const Datum& datum)
+Ref<Atom<T>> make_atom(const Datum& datum)
 {
     if (const auto t = std::get_if<T>(&datum.value))
     {
         Atom<T> tmp{T{*t}};
+        tmp.source = &datum;
         return make_ref(tmp);
     }
     else
     {
-        Exp err;
-        err.error();
-        exit(1);
+        return nullptr;
     }
 }
 
 template <class T>
-auto make_atom(const T& t)
+Ref<Atom<T>> make_atom(const T& t)
 {
     Atom<T> tmp{T{t}};
     return make_ref(tmp);

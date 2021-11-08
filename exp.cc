@@ -30,7 +30,14 @@ Ref<Exp> Exp::eval(const Env& env) const
 
 void Exp::error() const
 {
-    std::cerr << "Error parsing Exp.\n";
+    error("Unspecified error.");
+}
+
+void Exp::error(const std::string& err) const
+{
+    std::cerr << "Error parsing expression: ";
+    std::cerr << err;
+    std::cerr << std::endl;
 }
 
 Ref<Exp> make_exp(Env& env, const Datum& datum)
@@ -62,9 +69,7 @@ Ref<Exp> make_exp(Env& env, const Datum& datum)
             }
             else
             {
-                Exp err;
-                err.error();
-                exit(1);
+                return nullptr;
             }
         }
         else if (std::get_if<Arg>(&val))
@@ -73,39 +78,27 @@ Ref<Exp> make_exp(Env& env, const Datum& datum)
         }
         else if (std::get_if<KeywordQuote>(&val))
         {
-            Exp err;
-            err.error();
-            exit(1);
+            return nullptr;
         }
         else if (std::get_if<KeywordLambda>(&val))
         {
-            Exp err;
-            err.error();
-            exit(1);
+            return nullptr;
         }
         else if (std::get_if<KeywordIf>(&val))
         {
-            Exp err;
-            err.error();
-            exit(1);
+            return nullptr;
         }
         else if (std::get_if<KeywordSet>(&val))
         {
-            Exp err;
-            err.error();
-            exit(1);
+            return nullptr;
         }
         else if (std::get_if<KeywordDefine>(&val))
         {
-            Exp err;
-            err.error();
-            exit(1);
+            return nullptr;
         }
         else
         {
-            Exp err;
-            err.error();
-            exit(1);
+            return nullptr;
         }
     }
     else if (auto l = std::get_if<DatumList>(&datum.value))
@@ -115,38 +108,32 @@ Ref<Exp> make_exp(Env& env, const Datum& datum)
         const auto& val = env.get(id);
         if (std::get_if<KeywordQuote>(&val))
         {
-            return make_quote(*l);
+            return make_quote(datum);
         }
         else if (std::get_if<KeywordIf>(&val))
         {
-            return make_if(env, *l);
+            return make_if(env, datum);
         }
         else if (std::get_if<KeywordLambda>(&val))
         {
-            return make_lambda(env, *l);
+            return make_lambda(env, datum);
         }
         else if (std::get_if<KeywordSet>(&val))
         {
-            return make_set(env, *l);
+            return make_set(env, datum);
         }
         else if (std::get_if<KeywordDefine>(&val))
         {
-            Exp err;
-            err.error();
-            exit(1);
+            return nullptr;
         }
         else
         {
-            Exp err;
-            err.error();
-            exit(1);
+            return nullptr;
         }
     }
     else
     {
-        Exp err;
-        err.error();
-        exit(1);
+        return nullptr;
     }
 }
 

@@ -21,8 +21,8 @@ int main(int argc, char* argv[])
         program.eval();
         return 0;
 #endif
-	Figure::Program::repl();
-	return 0;
+        Figure::Program::repl();
+        return 0;
     }
 
     // Verify that an input and output file were provided.

@@ -7,12 +7,14 @@
 namespace Figure
 {
 
-Quote::Quote(const DatumList& l)
+Quote::Quote(const Datum& datum)
 {
+    const auto& l = std::get<DatumList>(datum.value);
+
     // Discard keyword.
     auto kwd = l.begin();
-    auto datum = ++kwd;
-    quoted = *datum;
+    auto q = ++kwd;
+    quoted = *q;
 }
 
 void Quote::print(std::ostream& o) const
@@ -21,9 +23,24 @@ void Quote::print(std::ostream& o) const
     quoted.print(o);
 }
 
-Ref<Exp> make_quote(const DatumList& l)
+void Quote::error() const
 {
-    Quote tmp{l};
+    error("Unspecified error.");
+}
+
+void Quote::error(const std::string& err) const
+{
+    std::cerr << "At character: " << quoted.pos << std::endl;
+    std::cerr << "At datum: ";
+    quoted.print(std::cerr);
+    std::cerr << std::endl;
+    std::cerr << "Error parsing quote expression: ";
+    std::cerr << err << std::endl;
+}
+
+Ref<Exp> make_quote(const Datum& datum)
+{
+    Quote tmp{datum};
     return make_ref(tmp);
 }
 

@@ -14,12 +14,15 @@ struct Quote : public Exp
 {
     Datum quoted;
 
-    Quote(const DatumList& l);
+    Quote(const Datum& datum);
 
     virtual void print(std::ostream& o) const;
+
+    virtual void error() const;
+    virtual void error(const std::string& err) const;
 };
 
-Ref<Exp> make_quote(const DatumList& l);
+Ref<Exp> make_quote(const Datum& datum);
 const Datum& get_quoted(const Ref<Exp>& ref);
 
 }

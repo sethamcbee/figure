@@ -57,7 +57,7 @@ struct Char
     {
         return value;
     }
-    
+
     operator Value&()
     {
         return value;
@@ -75,7 +75,7 @@ struct String
     using Value = std::string;
 
     Value value;
-    
+
     bool operator<(const String& rhs) const
     {
         return value < rhs.value;
@@ -98,7 +98,7 @@ struct Id
     {
         return value;
     }
-    
+
     operator Value&()
     {
         return value;

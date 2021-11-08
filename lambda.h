@@ -15,16 +15,20 @@ namespace Figure
 
 struct Lambda : public Exp
 {
+    const Datum* source = nullptr;
     Id keyword;
     Formals formals;
     Env env;
     Ref<Exp> body;
 
-    Lambda(Env& e, const DatumList& l);
+    Lambda(Env& e, const Datum& datum);
 
     virtual void print(std::ostream& o) const;
+
+    virtual void error() const;
+    virtual void error(const std::string& err) const;
 };
 
-Ref<Exp> make_lambda(Env& e, const DatumList& l);
+Ref<Exp> make_lambda(Env& e, const Datum& datum);
 
 }

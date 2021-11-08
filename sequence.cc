@@ -16,8 +16,20 @@ Sequence::Sequence(
     auto it = begin;
     while (it != last)
     {
-        commands.push_back(make_command(env, *it));
-        ++it;
+        auto cmd = make_command(env, *it);
+        if (cmd)
+        {
+            commands.push_back(cmd);
+            ++it;
+        }
+        else
+        {
+            std::cerr << "At character: " << it->pos << std::endl;
+            std::cerr << "At datum: ";
+            it->print(std::cerr);
+            std::cerr << "\nError processing sequence.\n";
+            exit(1);
+        }
     }
     expression = make_exp(env, *last);
     if (!expression)

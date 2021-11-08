@@ -35,6 +35,11 @@ Program::Program(std::istream& input)
         else
         {
             exp = make_command(env, datum);
+            if (!exp)
+            {
+                std::cerr << "Error parsing command.\n";
+                exit(1);
+            }
         }
         exps.push_back(exp);
     }
@@ -82,6 +87,11 @@ void Program::repl()
         else
         {
             exp = make_command(env, datum);
+            if (!exp)
+            {
+                std::cerr << "Error parsing command.\n";
+                exit(1);
+            }
         }
         exps.push_back(exp);
         exp->print(std::cout);

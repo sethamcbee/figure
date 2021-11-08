@@ -2,6 +2,8 @@
  * @file figure.cc
  */
 
+#include "command.h"
+#include "definition.h"
 #include "figure.h"
 #include "lexer.h"
 
@@ -32,14 +34,21 @@ Figure::Program::Program(std::istream& input)
         std::cout << std::endl;
         data.push_back(datum);
     }
-
     std::cout << "=====\nexp:\n=====\n";
-    for (const auto & datum : data)
+    for (const auto& datum : data)
     {
-        auto exp = Exp{ctx, datum};
-        exp.print();
+        Ref<Exp> exp;
+        if (is_definition(datum))
+        {
+            const auto& list = std::get<DatumList>(datum.value);
+            exp = make_definition(env, list);
+        }
+        else
+        {
+            exp = make_command(env, datum);
+        }
+        exp->print();
         std::cout << std::endl;
         exps.push_back(exp);
-        ctx = &exps.back().env;
     }
 }

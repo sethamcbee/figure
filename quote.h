@@ -4,16 +4,22 @@
 
 #pragma once
 
+#include "datum.h"
+#include "exp.h"
+
 namespace Figure
 {
 
-struct Datum;
-
-struct Quote
+struct Quote : public Exp
 {
     Datum quoted;
 
-    void print() const;
+    Quote(const DatumList& l);
+
+    virtual void print() const;
 };
+
+Ref<Exp> make_quote(const DatumList& l);
+const Datum& get_quoted(const Ref<Exp>& ref);
 
 }

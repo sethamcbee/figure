@@ -4,26 +4,27 @@
 
 #pragma once
 
-#include <list>
-
+#include "datum.h"
+#include "env.h"
+#include "exp.h"
 #include "formals.h"
+#include "literal.h"
 
 namespace Figure
 {
 
-struct Env;
-struct Exp;
-
-using ExpList = std::list<Exp>;
-
-struct Lambda
+struct Lambda : public Exp
 {
+    Id keyword;
     Formals formals;
-    ExpList bodies;
+    Env env;
+    Ref<Exp> body;
 
-    Lambda(Env& e, const Datum& d);
+    Lambda(Env& e, const DatumList& l);
 
-    void print() const;
+    virtual void print() const;
 };
+
+Ref<Exp> make_lambda(Env& e, const DatumList& l);
 
 }

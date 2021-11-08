@@ -7,12 +7,14 @@
 #include <list>
 #include <variant>
 
+#include "cons.h"
+#include "datum.h"
+#include "exp.h"
 #include "literal.h"
 
 namespace Figure
 {
 
-struct Datum;
 struct Env;
 
 using IdList = std::list<Id>;
@@ -22,14 +24,14 @@ struct IdPair
     IdList value;
 };
 
-struct Formals
+struct Formals : public Exp
 {
     using Value = std::variant<IdList, Id, IdPair>;
 
     Value value;
 
     Formals();
-    Formals(Env& e, const Datum& d);
+    Formals(Env& env, const Datum& datum);
 
     void print() const;
 };

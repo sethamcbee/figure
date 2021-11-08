@@ -8,6 +8,8 @@
 #include <string>
 #include <string_view>
 
+#include "atom.h"
+#include "cons.h"
 #include "datum.h"
 #include "env.h"
 #include "exp.h"
@@ -25,7 +27,7 @@ struct Program
     Lexer lexer;
     SexpList sexps;
     DatumList data;
-    ExpList exps;
+    std::list<Ref<Exp>> exps;
 
     Program(std::istream& input);
 

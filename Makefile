@@ -72,7 +72,12 @@ remake:
 	make clean
 	make all
 
-# Build and debug.
+# Build and debug interactive input.
+.PHONY: gdb
+gdb: $(OUTPUT)
+	gdb -tui ./$(OUTPUT)
+
+# Build and debug test file.
 .PHONY: test
 test: $(OUTPUT)
 	gdb -tui --args ./$(OUTPUT) test/test.scm build/test.cc

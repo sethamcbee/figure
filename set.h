@@ -4,24 +4,26 @@
 
 #pragma once
 
+#include "datum.h"
+#include "exp.h"
 #include "literal.h"
-#include "ref.h"
 
 namespace Figure
 {
 
 struct Env;
-struct Exp;
-struct Datum;
 
-struct Set
+struct Set : public Exp
 {
-    Id id;
-    Env* env;
+    Id keyword;
+    Id identifier;
+    Ref<Exp> expression;
 
-    Set(Env& e, const Datum& d);
+    Set(Env& env, const DatumList& l);
 
-    void print() const;
+    virtual void print() const;
 };
+
+Ref<Exp> make_set(Env& env, const DatumList& l);
 
 }

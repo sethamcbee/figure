@@ -2,37 +2,41 @@
  * @file lambda.cc
  */
 
-#include <iostream>
-
-#include "datum.h"
-#include "exp.h"
+#include "body.h"
 #include "lambda.h"
 
 namespace Figure
 {
 
-Lambda::Lambda(Env& e, const Datum& d)
+Lambda::Lambda(Env& e, const DatumList& l)
 {
-    const auto& l = std::get<DatumList>(d.value);
-    auto var = ++l.begin();
-    formals = Formals{e, *var};
-    for (auto body = ++var; body != l.end(); ++body)
-    {
-        auto exp = Exp{&e, *body};
-        bodies.push_back(exp);
-    }
+    env.parent = &e;
+
+    auto kwd = l.begin();
+    const auto& id = std::get<Id>(kwd->value);
+    keyword = id;
+
+    auto formals_p = ++kwd;
+    formals = Formals{env, *formals_p};
+
+    auto body_begin = ++formals_p;
+    auto body_end = l.end();
+    body = make_body(env, body_begin, body_end);
 }
 
 void Lambda::print() const
 {
-    std::cout << "(lambda ";
+    std::cout << "(" << keyword << " ";
     formals.print();
-    for (const auto& body : bodies)
-    {
-        std::cout << " ";
-        body.print();
-    }
+    std::cout << " ";
+    body->print();
     std::cout << ")";
+}
+
+Ref<Exp> make_lambda(Env& e, const DatumList& l)
+{
+    Lambda tmp{e, l};
+    return make_ref(tmp);
 }
 
 }

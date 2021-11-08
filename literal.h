@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <iostream>
 #include <string>
 
 namespace Figure
@@ -18,22 +19,33 @@ struct Bool
     using Value = bool;
 
     Value value;
-
-    operator Value&();
-
-    operator Value() const;
 };
+
+static inline std::ostream& operator<<(std::ostream& o, const Bool& b)
+{
+    if (b.value)
+    {
+        o << "#t";
+    }
+    else
+    {
+        o << "#f";
+    }
+    return o;
+}
 
 struct Number
 {
     using Value = double;
 
     Value value;
-
-    operator Value&();
-
-    operator Value() const;
 };
+
+static inline std::ostream& operator<<(std::ostream& o, const Number& n)
+{
+    o << n.value;
+    return o;
+}
 
 struct Char
 {
@@ -41,21 +53,40 @@ struct Char
 
     Value value;
 
-    operator Value&();
-
-    operator Value() const;
+    operator Value() const
+    {
+        return value;
+    }
+    
+    operator Value&()
+    {
+        return value;
+    }
 };
+
+static inline std::ostream& operator<<(std::ostream& o, const Char& c)
+{
+    o << c.value;
+    return o;
+}
 
 struct String
 {
     using Value = std::string;
 
     Value value;
-
-    operator Value&();
-
-    operator Value() const;
+    
+    bool operator<(const String& rhs) const
+    {
+        return value < rhs.value;
+    }
 };
+
+static inline std::ostream& operator<<(std::ostream& o, const String& str)
+{
+    o << "\"" << str.value << "\"";
+    return o;
+}
 
 struct Id
 {
@@ -63,11 +94,26 @@ struct Id
 
     Value value;
 
-    operator Value&();
+    operator Value() const
+    {
+        return value;
+    }
+    
+    operator Value&()
+    {
+        return value;
+    }
 
-    operator Value() const;
-
-    bool operator<(const Id& rhs) const;
+    bool operator<(const Id& rhs) const
+    {
+        return value < rhs.value;
+    }
 };
+
+static inline std::ostream& operator<<(std::ostream& o, const Id& id)
+{
+    o << id.value;
+    return o;
+}
 
 }

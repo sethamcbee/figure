@@ -11,6 +11,8 @@
 
 int main(int argc, char* argv[])
 {
+    std::cout << sizeof(Figure::Exp) << std::endl;
+    
     // Check if this is interactive.
     if (argc == 1)
     {
@@ -42,8 +44,7 @@ int main(int argc, char* argv[])
 
     // Parse and evaluate.
     Figure::Program program(input_file);
-    program.print();
-    std::cout << "\n=====\nEval:\n=====\n";
+    std::cout << "=====\nEval:\n=====\n";
     program.eval();
 
     // Compile if an output file was specified.

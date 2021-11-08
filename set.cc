@@ -2,38 +2,45 @@
  * @file set.cc
  */
 
-#include <iostream>
-
-#include "datum.h"
-#include "exp.h"
+#include "env.h"
 #include "set.h"
 
 namespace Figure
 {
 
-Set::Set(Env& e, const Datum& d)
+Set::Set(Env& env, const DatumList& l)
 {
-    env = &e;
-    const auto& l = std::get<DatumList>(d.value);
-    if (l.size() != 3)
+    auto kwd = l.begin();
+    keyword = std::get<Id>(kwd->value);
+
+    auto id = std::next(kwd);
+    identifier = std::get<Id>(id->value);
+    auto val = env.get(identifier);
+    if (auto ref = std::get_if<Ref<Exp>>(&val))
     {
-        std::cerr << "\nInvalid set! expression arguments.\n";
-        exit(1);
+        if (!*ref)
+        {
+            error();
+            exit(1);
+        }
     }
-    auto first = ++l.begin();
-    id = std::get<Id>(first->value);
-    auto second = ++first;
-    const auto& datum = *second;
-    auto exp = Ref<Exp>{new Exp{env, datum}};
-    env->map[id] = exp;
+
+    auto exp = std::next(id);
+    expression = make_exp(env, *exp);
+    env.set(identifier, expression);
 }
 
 void Set::print() const
 {
-    std::cout << "(set! " << id.value << " ";
-    auto exp = std::get<Ref<Exp>>(env->get(id));
-    exp->print();
+    std::cout << "(" << keyword << " " << identifier << " ";
+    expression->print();
     std::cout << ")";
+}
+
+Ref<Exp> make_set(Env& env, const DatumList& l)
+{
+    Set tmp{env, l};
+    return make_ref(tmp);
 }
 
 }

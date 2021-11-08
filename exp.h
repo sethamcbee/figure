@@ -4,44 +4,21 @@
 
 #pragma once
 
-#include <variant>
-#include <vector>
-
-#include "datum.h"
-#include "env.h"
-#include "if.h"
-#include "lambda.h"
-#include "literal.h"
-#include "proc.h"
-#include "quote.h"
 #include "ref.h"
-#include "set.h"
 
 namespace Figure
 {
 
-struct Exp;
-
-using ExpVector = std::vector<Exp>;
-using ExpList = std::list<Exp>;
-
-struct ExpPair
-{
-    ExpList value;
-};
+struct Env;
+struct Datum;
 
 struct Exp
 {
-    using Value = std::variant<Bool, Char, Number, String, Id, Ref<Exp>,
-          ExpVector, Quote, Proc, Lambda, If, Set>;
+    virtual void print() const;
 
-    Value value;
-    Env env;
-
-    Exp();
-    Exp(const Env* ctx, const Datum& d);
-
-    void print() const;
+    virtual void error();
 };
+
+Ref<Exp> make_exp(Env& env, const Datum& datum);
 
 }

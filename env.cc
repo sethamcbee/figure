@@ -25,6 +25,11 @@ Env::Value Env::get(const Key& k) const
     }
 }
 
+void Env::set(const Key& k, const Value& v)
+{
+    map[k] = v;
+}
+
 Env init_env()
 {
     Env env;
@@ -33,6 +38,7 @@ Env init_env()
     env.map[Id{"lambda"}] = KeywordLambda{};
     env.map[Id{"if"}] = KeywordIf{};
     env.map[Id{"set!"}] = KeywordSet{};
+    env.map[Id{"define"}] = KeywordDefine{};
 
     return env;
 }

@@ -4,25 +4,27 @@
 
 #pragma once
 
-#include <variant>
+#include "datum.h"
+#include "exp.h"
+#include "literal.h"
 
 namespace Figure
 {
 
 struct Env;
-struct Exp;
 
-struct NoAlternate {};
-
-struct If
+struct If : public Exp
 {
-    using Value = std::list<std::variant<Exp, NoAlternate>>;
+    Id keyword;
+    Ref<Exp> test;
+    Ref<Exp> consequent;
+    Ref<Exp> alternate;
 
-    Value value;
+    If(Env&, const DatumList& l);
 
-    If(Env& e, const Datum& d);
-
-    void print() const;
+    virtual void print() const;
 };
+
+Ref<Exp> make_if(Env& env, const DatumList& l);
 
 }

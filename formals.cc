@@ -2,9 +2,7 @@
  * @file formals.cc
  */
 
-#include <iostream>
-
-#include "datum.h"
+#include "atom.h"
 #include "env.h"
 #include "formals.h"
 
@@ -12,38 +10,39 @@ namespace Figure
 {
 
 Formals::Formals()
-{
-    value = IdList{};
-}
+{}
 
-Formals::Formals(Env& e, const Datum& d)
+Formals::Formals(Env& env, const Datum& datum)
 {
-    if (auto id = std::get_if<Id>(&d.value))
+    if (auto id = std::get_if<Id>(&datum.value))
     {
-        e.map[*id] = Arg{};
         value = *id;
+        auto arg = Arg{};
+        env.set(*id, arg);
     }
-    else if (auto l = std::get_if<DatumList>(&d.value))
+    else if (auto l = std::get_if<DatumList>(&datum.value))
     {
         value = IdList{};
         auto& list = std::get<IdList>(value);
-        for (const auto& id : *l)
+        auto arg = Arg{};
+        for (const auto& datum : *l)
         {
-            auto arg = std::get<Id>(id.value);
-            e.map[arg] = Arg{};
-            list.push_back(arg);
+            const auto& id = std::get<Id>(datum.value);
+            list.push_back(id);
+            env.set(id, arg);
         }
     }
-    else if (auto p = std::get_if<DatumPair>(&d.value))
+    else if (auto p = std::get_if<DatumPair>(&datum.value))
     {
         value = IdPair{};
         auto& pair = std::get<IdPair>(value);
         auto& list = pair.value;
-        for (const auto& id : p->value)
+        auto arg = Arg{};
+        for (const auto& datum : p->value)
         {
-            auto arg = std::get<Id>(id.value);
-            e.map[arg] = Arg{};
-            list.push_back(arg);
+            const auto& id = std::get<Id>(datum.value);
+            list.push_back(id);
+            env.set(id, arg);
         }
     }
 }
@@ -52,7 +51,7 @@ void Formals::print() const
 {
     if (auto id = std::get_if<Id>(&value))
     {
-        std::cout << id->value;
+        std::cout << *id;
     }
     else if (auto l = std::get_if<IdList>(&value))
     {
@@ -60,7 +59,7 @@ void Formals::print() const
         const char* space = "";
         for (const auto& id : *l)
         {
-            std::cout << space << id.value;
+            std::cout << space << id;
             space = " ";
         }
         std::cout << ")";
@@ -73,10 +72,12 @@ void Formals::print() const
         const char* space = "";
         for (auto id = l.begin(); id != last; ++id)
         {
-            std::cout << space << id->value;
+            std::cout << space << *id;
             space = " ";
         }
-        std::cout << " . " << last->value << ")";
+        std::cout << " . ";
+        std::cout << *last;
+        std::cout << ")";
     }
 }
 

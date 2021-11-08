@@ -3,148 +3,139 @@
  */
 
 #include <iostream>
+#include <variant>
 
+#include "atom.h"
+#include "datum.h"
+#include "env.h"
 #include "exp.h"
+#include "if.h"
+#include "lambda.h"
+#include "literal.h"
+#include "quote.h"
+#include "set.h"
 
 namespace Figure
 {
 
-Exp::Exp()
+void Exp::print() const
 {
-    value = Bool{false};
+    std::cout << "[default exp]";
 }
 
-Exp::Exp(const Env* ctx, const Datum& d)
+void Exp::error()
 {
-    env.parent = ctx;
+    std::cout << "Error parsing Exp.\n";
+}
 
-    if (auto b = std::get_if<Bool>(&d.value))
+Ref<Exp> make_exp(Env& env, const Datum& datum)
+{
+    if (std::get_if<Bool>(&datum.value))
     {
-        value = *b;
+        return make_atom<Bool>(datum);
     }
-    else if (auto c = std::get_if<Char>(&d.value))
+    else if (std::get_if<Char>(&datum.value))
     {
-        value = *c;
+        return make_atom<Char>(datum);
     }
-    else if (auto n = std::get_if<Number>(&d.value))
+    else if (std::get_if<Number>(&datum.value))
     {
-        value = *n;
+        return make_atom<Number>(datum);
     }
-    else if (auto str = std::get_if<String>(&d.value))
+    else if (std::get_if<String>(&datum.value))
     {
-        value = *str;
+        return make_atom<String>(datum);
     }
-    else if (auto id = std::get_if<Id>(&d.value))
+    else if (auto id = std::get_if<Id>(&datum.value))
     {
         auto val = env.get(*id);
-        if (auto kwd = std::get_if<KeywordQuote>(&val))
+        if (auto exp = std::get_if<Ref<Exp>>(&val))
         {
-            std::cerr << "\nInvalid keyword.\n";
-            exit(1);
-        }
-        else if (auto exp = std::get_if<Ref<Exp>>(&val))
-        {
-            value = *exp;
-        }
-        else if (auto arg = std::get_if<Arg>(&val))
-        {
-            value = *id;
-        }
-        else
-        {
-            std::cerr << "\nIdentifier not found.\n";
-            exit(1);
-        }
-    }
-    else if (auto l = std::get_if<DatumList>(&d.value))
-    {
-        const auto& first = l->front();
-        if (auto id = std::get_if<Id>(&first.value))
-        {
-            auto val = env.get(*id);
-            if (std::get_if<KeywordQuote>(&val))
+            if (auto val = *exp)
             {
-                // TODO: Check length.
-                auto it = l->begin();
-                ++it;
-                value = Quote{*it};
-            }
-            else if (std::get_if<KeywordLambda>(&val))
-            {
-                value = Lambda{env, d};
-            }
-            else if (std::get_if<KeywordIf>(&val))
-            {
-                value = If{env, d};
-            }
-            else if (std::get_if<KeywordSet>(&val))
-            {
-                value = Set{env, d};
-            }
-            else if (std::get_if<Ref<Exp>>(&val))
-            {
-                value = Proc{env, d}; 
+                return val;
             }
             else
             {
-                std::cerr << "\nInvalid list.\n";
+                Exp err;
+                err.error();
                 exit(1);
             }
         }
+        else if (std::get_if<Arg>(&val))
+        {
+            return make_atom<Id>(*id);
+        }
+        else if (std::get_if<KeywordQuote>(&val))
+        {
+            Exp err;
+            err.error();
+            exit(1);
+        }
+        else if (std::get_if<KeywordLambda>(&val))
+        {
+            Exp err;
+            err.error();
+            exit(1);
+        }
+        else if (std::get_if<KeywordIf>(&val))
+        {
+            Exp err;
+            err.error();
+            exit(1);
+        }
+        else if (std::get_if<KeywordSet>(&val))
+        {
+            Exp err;
+            err.error();
+            exit(1);
+        }
+        else if (std::get_if<KeywordDefine>(&val))
+        {
+            Exp err;
+            err.error();
+            exit(1);
+        }
         else
         {
-            std::cerr << "\nInvalid list element.\n";
+            Exp err;
+            err.error();
+            exit(1);
+        }
+    }
+    else if (auto l = std::get_if<DatumList>(&datum.value))
+    {
+        const auto& first = l->front();
+        const auto& id = std::get<Id>(first.value);
+        const auto& val = env.get(id);
+        if (std::get_if<KeywordQuote>(&val))
+        {
+            return make_quote(*l);
+        }
+        else if (std::get_if<KeywordIf>(&val))
+        {
+            return make_if(env, *l);
+        }
+        else if (std::get_if<KeywordLambda>(&val))
+        {
+            return make_lambda(env, *l);
+        }
+        else if (std::get_if<KeywordSet>(&val))
+        {
+            return make_set(env, *l);
+        }
+        else
+        {
+            Exp err;
+            err.error();
             exit(1);
         }
     }
     else
     {
-        std::cerr << "\nInvalid datum.\n";
+        Exp err;
+        err.error();
         exit(1);
-    }
-}
-
-void Exp::print() const
-{
-    if (auto b = std::get_if<Bool>(&value))
-    {
-        std::cout << b->value;
-    }
-    else if (auto c = std::get_if<Char>(&value))
-    {
-        std::cout << c->value;
-    }
-    else if (auto n = std::get_if<Number>(&value))
-    {
-        std::cout << n->value;
-    }
-    else if (auto str = std::get_if<String>(&value))
-    {
-        std::cout << "\"" << str->value << "\"";
-    }
-    else if (auto id = std::get_if<Id>(&value))
-    {
-        std::cout << id->value;
-    }
-    else if (auto quote = std::get_if<Quote>(&value))
-    {
-        quote->print();
-    }
-    else if (auto proc = std::get_if<Proc>(&value))
-    {
-        proc->print();
-    }
-    else if (auto lambda = std::get_if<Lambda>(&value))
-    {
-        lambda->print();
-    }
-    else if (auto if_form = std::get_if<If>(&value))
-    {
-        if_form->print();
-    }
-    else if (auto set = std::get_if<Set>(&value))
-    {
-        set->print();
     }
 }
 

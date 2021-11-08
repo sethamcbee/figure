@@ -13,15 +13,18 @@ template <class T>
 using Ref = std::shared_ptr<T>;
 
 template <class T>
-Ref<T> make_ref(T&& t)
+using WeakRef = std::weak_ptr<T>;
+
+template <class T>
+Ref<T> make_ref(const T& t)
 {
     return Ref<T>{new T{t}};
 }
 
 template <class T>
-Ref<T> make_ref(const T&& t)
+WeakRef<T> make_weakref(const T& t)
 {
-    return Ref<T>{new T{t}};
+    return WeakRef<T>{new T{t}};
 }
 
 }

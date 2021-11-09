@@ -21,6 +21,7 @@ SyntaxRule::SyntaxRule(Env& env, const Datum& datum)
     pattern = make_pattern(env, pat);
 
     const auto& tmpl = l.back();
+    pattern_template = make_template(env, tmpl);
 }
 
 void SyntaxRule::print(std::ostream& o) const
@@ -28,7 +29,7 @@ void SyntaxRule::print(std::ostream& o) const
     o << "(";
     pattern->print(o);
     o << " ";
-    //template->print(o);
+    pattern_template->print(o);
     o << ")";
 }
 

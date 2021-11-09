@@ -13,13 +13,15 @@
 namespace Figure
 {
 
+struct Body;
+
 struct Lambda : public Exp
 {
     const Datum* source = nullptr;
     Id keyword;
     Formals formals;
     Env env;
-    Ref<Exp> body;
+    Ref<Body> body;
 
     Lambda(Env& e, const Datum& datum);
 
@@ -29,6 +31,6 @@ struct Lambda : public Exp
     void error(const std::string& err) const;
 };
 
-Ref<Exp> make_lambda(Env& e, const Datum& datum);
+Ref<Lambda> make_lambda(Env& e, const Datum& datum);
 
 }

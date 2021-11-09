@@ -7,13 +7,13 @@
 namespace Figure
 {
 
-Ref<Exp> cons()
+Ref<Cons> cons()
 {
     Cons tmp;
     return make_ref(tmp);
 }
 
-Ref<Exp> cons(const Ref<Exp>& a, const Ref<Exp>& d)
+Ref<Cons> cons(const Ref<Exp>& a, const Ref<Exp>& d)
 {
     Cons tmp;
     tmp.car = a;

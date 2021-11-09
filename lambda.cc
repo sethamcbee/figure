@@ -58,7 +58,7 @@ void Lambda::error(const std::string& err) const
     std::cerr << err << std::endl;
 }
 
-Ref<Exp> make_lambda(Env& e, const Datum& datum)
+Ref<Lambda> make_lambda(Env& e, const Datum& datum)
 {
     Lambda tmp{e, datum};
     return make_ref(tmp);

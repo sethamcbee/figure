@@ -16,7 +16,7 @@ struct Env;
 struct Definition : public Exp
 {};
 
-Ref<Exp> make_definition(Env& env, const Datum& datum);
+Ref<Definition> make_definition(Env& env, const Datum& datum);
 
 bool is_definition(const Datum& datum);
 

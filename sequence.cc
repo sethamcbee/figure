@@ -55,7 +55,7 @@ void Sequence::print(std::ostream& o) const
     expression->print(o);
 }
 
-Ref<Exp> make_sequence(
+Ref<Sequence> make_sequence(
     Env& env, DatumList::const_iterator begin,
     DatumList::const_iterator end)
 {

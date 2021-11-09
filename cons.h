@@ -16,8 +16,8 @@ struct Cons : public Exp
     Ref<Exp> cdr;
 };
 
-Ref<Exp> cons();
-Ref<Exp> cons(const Ref<Exp>& a, const Ref<Exp>& d);
+Ref<Cons> cons();
+Ref<Cons> cons(const Ref<Exp>& a, const Ref<Exp>& d);
 
 Ref<Exp> car(const Ref<Exp>& p);
 Ref<Exp> cdr(const Ref<Exp>& p);

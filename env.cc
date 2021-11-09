@@ -61,6 +61,7 @@ Env init_env()
     env.map[Id{"if"}] = KeywordIf{};
     env.map[Id{"set!"}] = KeywordSet{};
     env.map[Id{"define"}] = KeywordDefine{};
+    env.map[Id{"define-syntax"}] = KeywordDefineSyntax{};
 
     return env;
 }

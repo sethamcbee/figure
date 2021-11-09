@@ -58,7 +58,7 @@ void Set::error(const std::string& err) const
     std::cerr << err << std::endl;
 }
 
-Ref<Exp> make_set(Env& env, const Datum& datum)
+Ref<Set> make_set(Env& env, const Datum& datum)
 {
     Set tmp{env, datum};
     return make_ref(tmp);

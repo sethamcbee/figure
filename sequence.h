@@ -26,7 +26,7 @@ struct Sequence : public Exp
     virtual void print(std::ostream& o) const;
 };
 
-Ref<Exp> make_sequence(
+Ref<Sequence> make_sequence(
     Env& env, DatumList::const_iterator begin,
     DatumList::const_iterator end);
 

@@ -38,7 +38,7 @@ void Quote::error(const std::string& err) const
     std::cerr << err << std::endl;
 }
 
-Ref<Exp> make_quote(const Datum& datum)
+Ref<Quote> make_quote(const Datum& datum)
 {
     Quote tmp{datum};
     return make_ref(tmp);

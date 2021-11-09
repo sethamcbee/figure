@@ -22,7 +22,7 @@ struct Quote : public Exp
     virtual void error(const std::string& err) const;
 };
 
-Ref<Exp> make_quote(const Datum& datum);
+Ref<Quote> make_quote(const Datum& datum);
 const Datum& get_quoted(const Ref<Exp>& ref);
 
 }

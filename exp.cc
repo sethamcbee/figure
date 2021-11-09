@@ -96,6 +96,10 @@ Ref<Exp> make_exp(Env& env, const Datum& datum)
         {
             return nullptr;
         }
+        else if (std::get_if<KeywordDefineSyntax>(&val))
+        {
+            return nullptr;
+        }
         else
         {
             return nullptr;
@@ -123,6 +127,10 @@ Ref<Exp> make_exp(Env& env, const Datum& datum)
             return make_set(env, datum);
         }
         else if (std::get_if<KeywordDefine>(&val))
+        {
+            return nullptr;
+        }
+        else if (std::get_if<KeywordDefineSyntax>(&val))
         {
             return nullptr;
         }

@@ -20,6 +20,7 @@ struct KeywordLambda {};
 struct KeywordIf {};
 struct KeywordSet {};
 struct KeywordDefine {};
+struct KeywordDefineSyntax {};
 struct Arg {};
 
 struct Env
@@ -27,7 +28,7 @@ struct Env
     using Key = Id;
     using Value = std::variant<
                   KeywordQuote, KeywordLambda, KeywordIf, KeywordSet,
-                  KeywordDefine, Arg, Ref<Exp>>;
+                  KeywordDefine, KeywordDefineSyntax, Arg, Ref<Exp>>;
     using Map = std::map<Key, Value>;
 
     Map map;

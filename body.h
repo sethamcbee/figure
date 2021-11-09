@@ -13,12 +13,13 @@
 namespace Figure
 {
 
+struct Definition;
 struct Env;
 
 struct Body : Exp
 {
-    std::list<Ref<Exp>> definitions;
-    Ref<Exp> sequence;
+    std::list<Ref<Definition>> definitions;
+    Ref<Sequence> sequence;
 
     Body(
         Env& env, DatumList::const_iterator begin,

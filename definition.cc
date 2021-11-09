@@ -10,7 +10,7 @@
 namespace Figure
 {
 
-Ref<Exp> make_definition(Env& env, const Datum& datum)
+Ref<Definition> make_definition(Env& env, const Datum& datum)
 {
     const auto& l = std::get<DatumList>(datum.value);
     auto kwd = l.begin();

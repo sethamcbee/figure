@@ -28,6 +28,6 @@ struct Set : public Exp
     void error(const std::string& err) const;
 };
 
-Ref<Exp> make_set(Env& env, const Datum& datum);
+Ref<Set> make_set(Env& env, const Datum& datum);
 
 }

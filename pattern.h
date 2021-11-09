@@ -60,10 +60,16 @@ struct PatternNumber : public Pattern
 
 struct PatternUnderscore : public Pattern
 {
+    void print(std::ostream& o) const;
 };
 
 struct PatternList : public Pattern
 {
+    std::list<Ref<Pattern>> value;
+
+    PatternList(Env& env, const Datum& datum);
+
+    void print(std::ostream& o) const;
 };
 
 struct PatternImproper : public Pattern

@@ -23,13 +23,13 @@ Ref<Cons> cons(const Ref<Exp>& a, const Ref<Exp>& d)
 
 Ref<Exp> car(const Ref<Exp>& p)
 {
-    const auto& c = std::static_pointer_cast<Cons>(p);
+    const auto& c = static_ref_cast<Cons>(p);
     return c->car;
 }
 
 Ref<Exp> cdr(const Ref<Exp>& p)
 {
-    const auto& c = std::static_pointer_cast<Cons>(p);
+    const auto& c = static_ref_cast<Cons>(p);
     return c->cdr;
 }
 

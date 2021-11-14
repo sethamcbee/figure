@@ -46,7 +46,7 @@ Ref<Quote> make_quote(const Datum& datum)
 
 const Datum& get_quoted(const Ref<Exp>& ref)
 {
-    auto p = std::static_pointer_cast<Quote>(ref);
+    auto p = static_ref_cast<Quote>(ref);
     return p->quoted;
 }
 

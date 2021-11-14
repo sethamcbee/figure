@@ -17,10 +17,13 @@ namespace Figure
 bool is_delim(Char c);
 bool is_special(Char c);
 bool is_id_start(Char c);
+bool is_explicit_sign(Char c);
 bool is_peculiar(Char c);
 bool is_initial(Char c);
 bool is_subsequent(Char c);
 bool is_special_subsequent(Char c);
+bool is_sign_subsequent(Char c);
+bool is_dot_subsequent(Char c);
 bool is_line_ending(Char c);
 
 struct LEOF {};

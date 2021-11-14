@@ -52,7 +52,7 @@ bool is_id_start(Char c)
     return is_initial(c) || c == '|' || is_peculiar(c);
 }
 
-bool is_peculiar(Char c)
+bool is_explicit_sign(Char c)
 {
     switch (c)
     {
@@ -62,6 +62,11 @@ bool is_peculiar(Char c)
     default:
         return false;
     }
+}
+
+bool is_peculiar(Char c)
+{
+    return is_explicit_sign(c) || c == '.';
 }
 
 bool is_initial(Char c)
@@ -86,6 +91,16 @@ bool is_special_subsequent(Char c)
     default:
         return false;
     }
+}
+
+bool is_sign_subsequent(Char c)
+{
+    return is_initial(c) || is_explicit_sign(c) || c == '@';
+}
+
+bool is_dot_subsequent(Char c)
+{
+    return is_sign_subsequent(c) || c == '.';
 }
 
 bool is_line_ending(Char c)
@@ -197,6 +212,39 @@ void Lexer::next_token()
         }
         Token tok{Id{src}, pos};
         tokens.push_back(tok);
+    }
+    else if (ch == '.')
+    {
+        src += ch;
+        if (input->good())
+        {
+            input->get(ch);
+            if (!is_dot_subsequent(ch))
+            {
+                Token tok{Dot{}, pos};
+                tokens.push_back(tok);
+            }
+            else
+            {
+                src += ch;
+                while (input->good())
+                {
+                    input->get(ch);
+                    if (!is_dot_subsequent(ch))
+                    {
+                        break;
+                    }
+                    src += ch;
+                }
+                Token tok{Id{src}, pos};
+                tokens.push_back(tok);
+            }
+        }
+        else
+        {
+            std::string err{"Unexpected dot at end of file."};
+            error(err);
+        }
     }
     else if (is_peculiar(ch))
     {

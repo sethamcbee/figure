@@ -72,6 +72,16 @@ struct PatternList : public Pattern
     void print(std::ostream& o) const;
 };
 
+struct PatternEllipsesList : public Pattern
+{
+    std::list<Ref<Pattern>> before;
+    std::list<Ref<Pattern>> after;
+
+    PatternEllipsesList(Env& env, const Datum& datum);
+
+    void print(std::ostream& o) const;
+};
+
 struct PatternImproper : public Pattern
 {
 };

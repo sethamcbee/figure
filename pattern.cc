@@ -86,6 +86,49 @@ void PatternList::print(std::ostream& o) const
     o << ")";
 }
 
+PatternEllipsesList::PatternEllipsesList(Env& env, const Datum& datum)
+{
+    std::list<Datum>::const_iterator ellipses;
+    const auto& l = std::get<DatumList>(datum.value);
+    for (auto d = l.begin(); d != l.end(); ++d)
+    {
+        if (auto id = std::get_if<Id>(&d->value))
+        {
+            if (id->value == "...")
+            {
+                ellipses = d;
+                break;
+            }
+        }
+        auto pat = make_pattern(env, *d);
+        before.push_back(pat);
+    }
+    for (auto d = std::next(ellipses); d != l.end(); ++d)
+    {
+        auto pat = make_pattern(env, *d);
+        after.push_back(pat);
+    }
+}
+
+void PatternEllipsesList::print(std::ostream& o) const
+{
+    o << "(";
+    const char* space = "";
+    for (const auto& pat : before)
+    {
+        o << space;
+        pat->print(o);
+        space = " ";
+    }
+    o << space << "...";
+    for (const auto& pat : after)
+    {
+        o << space;
+        pat->print(o);
+    }
+    o << ")";
+}
+
 Ref<Pattern> make_pattern(Env& env, const Datum& datum)
 {
     if (auto id = std::get_if<Id>(&datum.value))
@@ -143,8 +186,8 @@ Ref<Pattern> make_pattern(Env& env, const Datum& datum)
         }
         if (ellipses != l.end())
         {
-            // Ellipses not supported currently.
-            return nullptr;
+            PatternEllipsesList tmp{env, datum};
+            return make_ref(tmp);
         }
         else
         {
@@ -155,6 +198,9 @@ Ref<Pattern> make_pattern(Env& env, const Datum& datum)
     else if (auto p = std::get_if<DatumPair>(&datum.value))
     {
         const auto& l = p->value;
+
+        // Check for ellipses.
+
         return nullptr;
     }
     else

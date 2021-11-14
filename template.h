@@ -66,6 +66,16 @@ struct TemplateList : public Template
     void print(std::ostream& o) const;
 };
 
+struct TemplateEllipsesList : public Template
+{
+    std::list<Ref<Template>> before;
+    std::list<Ref<Template>> after;
+
+    TemplateEllipsesList(Env& env, const Datum& datum);
+
+    void print(std::ostream& o) const;
+};
+
 Ref<Template> make_template(Env& env, const Datum& datum);
 
 }

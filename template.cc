@@ -81,6 +81,48 @@ void TemplateList::print(std::ostream& o) const
     o << ")";
 }
 
+TemplateEllipsesList::TemplateEllipsesList(Env& env, const Datum& datum)
+{
+    std::list<Datum>::const_iterator ellipses;
+    const auto& l = std::get<DatumList>(datum.value);
+    for (auto d = l.begin(); d != l.end(); ++d)
+    {
+        if (auto id = std::get_if<Id>(&d->value))
+        {
+            if (id->value == "...")
+            {
+                ellipses = d;
+                break;
+            }
+        }
+        auto tmpl = make_template(env, *d);
+        before.push_back(tmpl);
+    }
+    for (auto d = std::next(ellipses); d != l.end(); ++d)
+    {
+        auto tmpl = make_template(env, *d);
+        after.push_back(tmpl);
+    }
+}
+
+void TemplateEllipsesList::print(std::ostream& o) const
+{
+    o << "(";
+    const char* space = "";
+    for (const auto& tmpl : before)
+    {
+        o << space;
+        tmpl->print(o);
+        space = " ";
+    }
+    o << space << "...";
+    for (const auto& tmpl : after)
+    {
+        o << space;
+        tmpl->print(o);
+    }
+    o << ")";
+}
 
 Ref<Template> make_template(Env& env, const Datum& datum)
 {
@@ -133,8 +175,8 @@ Ref<Template> make_template(Env& env, const Datum& datum)
         }
         if (ellipses != l.end())
         {
-            // Ellipses not supported.
-            return nullptr;
+            TemplateEllipsesList tmp{env, datum};
+            return make_ref(tmp);
         }
         else
         {

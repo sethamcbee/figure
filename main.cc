@@ -14,13 +14,6 @@ int main(int argc, char* argv[])
     // Check if this is interactive.
     if (argc == 1)
     {
-#if 0
-        Figure::Program program(std::cin);
-        program.print();
-        std::cout << "=====\nEval:\n=====\n";
-        program.eval();
-        return 0;
-#endif
         Figure::Program::repl();
         return 0;
     }

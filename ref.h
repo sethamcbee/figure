@@ -4,7 +4,9 @@
 
 #pragma once
 
+#include <iostream>
 #include <memory>
+#include <queue>
 #include <variant>
 
 namespace Figure
@@ -15,6 +17,9 @@ using StrongRef = std::shared_ptr<T>;
 
 template <class T>
 using WeakRef = std::weak_ptr<T>;
+
+template <class T>
+using Queue = std::queue<T>;
 
 template <class T>
 struct Ref

@@ -1,43 +1,23 @@
-/**
- * @file figure.h
- */
+// Copyright of Wet Blanket Studios
 
 #pragma once
 
-#include <iostream>
-#include <string>
-#include <string_view>
+#include "CoreMinimal.h"
+#include "UObject/NoExportTypes.h"
+#include "Figure.generated.h"
 
-#include "atom.h"
-#include "cons.h"
-#include "datum.h"
-#include "env.h"
-#include "exp.h"
-#include "lexer.h"
-#include "ref.h"
-#include "sexp.h"
-
-namespace Figure
+/**
+ * 
+ */
+UCLASS()
+class PAPERTOWNS_API UFigure : public UObject
 {
+	GENERATED_BODY()
 
-struct Program
-{
-    Env env;
-    Env* ctx;
-    Lexer lexer;
-    SexpList sexps;
-    DatumList data;
-    std::list<Ref<Exp>> exps;
+public:
 
-    Program(std::istream& input);
+	UFigure();
 
-    void print();
-
-    void eval();
-
-    static void repl();
-
-    void compile(std::string_view output);
+	UFUNCTION(BlueprintCallable)
+	void Read(const FString& Input);
 };
-
-}

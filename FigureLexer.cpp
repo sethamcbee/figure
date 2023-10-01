@@ -12,7 +12,7 @@ void UFigureLexer::Read(const FString& Input)
     SSIZE_T CurrentToken = 0;
     SSIZE_T Position = 0;
     auto Char = Source[Position];
-    while (Char != '\0')
+    while (Position < Source.Len())
     {
         // Skip whitespace
         while (IsWhitespace(Char))
@@ -35,46 +35,91 @@ void UFigureLexer::Read(const FString& Input)
         }
 
         // Check for end of source
-        if (Char == '\0')
+        if (Position >= Source.Len())
         {
             return;
         }
-        // Else, get token
-        Tokens.AddDefaulted();
 
-        // Check for identifier
-        if (IsInitial(Char))
+        // Else, get token
+        if (IsIdentifierStart(Position))
         {
-            FString SrcStr;
-            do
-            {
-                SrcStr += Char;
-                ++Position;
-                Char = Source[Position];
-                if (!IsSubsequent(Char))
-                {
-                    break;
-                }
-            }
-            while (Char != '\0');
-            FFigureToken NewToken{ EFigureTokenType::Identifier, Position };
-            NewToken.Value.Emplace<FString>(SrcStr);
-            Tokens[CurrentToken] = NewToken;
+            Tokens.Add(GetIdentifier(Position));
         }
-        else if (Char == '|')
+    }
+}
+
+void UFigureLexer::Error(const FString& Msg)
+{
+    UE_LOG(LogTemp, Warning, TEXT("FigureLexer error: %s"), *Msg);
+}
+
+FFigureToken UFigureLexer::GetIdentifier(SSIZE_T& Position)
+{
+    SSIZE_T StartingPosition = Position;
+    TCHAR Char = Source[Position];
+    if (IsInitial(Position))
+    {
+        FString SrcStr{ "" };
+        SrcStr += Char;
+        ++Position;
+        while (IsSubsequent(Position))
         {
+            SrcStr += Source[Position];
+            ++Position;
+        }
+        FFigureToken NewToken{ EFigureTokenType::Identifier, StartingPosition };
+        NewToken.Value.Emplace<FString>(SrcStr);
+        return NewToken;
+    }
+    else if (IsVerticalLine(Position))
+    {
+        FString SrcStr{ "" };
+        SrcStr += Char;
+        ++Position;
+        while (IsSymbolElement(Position))
+        {
+            SrcStr += Source[Position];
+            ++Position;
+        }
+        if (IsVerticalLine(Position))
+        {
+            SrcStr += '|';
+            FFigureToken NewToken{ EFigureTokenType::Identifier, StartingPosition };
+            NewToken.Value.Emplace<FString>(SrcStr);
+            return NewToken;
         }
         else
         {
-            return;
+            Error("No matching vertical line for identifier");
+            FFigureToken NewToken{ EFigureTokenType::Error, StartingPosition };
+            return NewToken;
         }
     }
+    else
+    {
+        Error("Could not parse identifier");
+        FFigureToken NewToken{ EFigureTokenType::Error, StartingPosition };
+        return NewToken;
+    }
 }
 
-bool UFigureLexer::IsDelim(TCHAR Char)
+bool UFigureLexer::IsIdentifierStart(SSIZE_T Position)
 {
-    if (IsWhitespace(Char) || (Char == '(') || (Char == ')') || (Char == '"')
-        || (Char == '\'') || (Char == ';'))
+    TCHAR Char = Source[Position];
+    if (Position >= Source.Len())
+    {
+        return false;
+    }
+    else if (IsInitial(Position))
+    {
+        return true;
+    }
+    else if (IsVerticalLine(Position))
+    {
+        // TODO: Check if this has matching vertical line
+        return true;
+    }
+    else if (IsPeculiarStart(Position))
     {
         return true;
     }
@@ -84,9 +129,18 @@ bool UFigureLexer::IsDelim(TCHAR Char)
     }
 }
 
-bool UFigureLexer::IsWhitespace(TCHAR Char)
+bool UFigureLexer::IsInitial(SSIZE_T Position)
 {
-    if (TChar<TCHAR>::IsWhitespace(Char))
+    TCHAR Char = Source[Position];
+    if (Position >= Source.Len())
+    {
+        return false;
+    }
+    else if (TChar<TCHAR>::IsAlpha(Char))
+    {
+        return true;
+    }
+    else if (IsSpecialInitial(Position))
     {
         return true;
     }
@@ -96,99 +150,397 @@ bool UFigureLexer::IsWhitespace(TCHAR Char)
     }
 }
 
-bool UFigureLexer::IsSpecial(TCHAR Char)
+bool UFigureLexer::IsSpecialInitial(SSIZE_T Position)
 {
-    switch (Char)
+    TCHAR Char = Source[Position];
+    if (Position >= Source.Len())
     {
-    case '!':
-    case '$':
-    case '%':
-    case '&':
-    case '*':
-    case '/':
-    case ':':
-    case '<':
-    case '=':
-    case '>':
-    case '?':
-    case '^':
-    case '_':
-    case '~':
+        return false;
+    }
+    else if (Char == '!')
+    {
         return true;
-    default:
+    }
+    else if (Char == '$')
+    {
+        return true;
+    }
+    else if (Char == '%')
+    {
+        return true;
+    }
+    else if (Char == '&')
+    {
+        return true;
+    }
+    else if (Char == '*')
+    {
+        return true;
+    }
+    else if (Char == '/')
+    {
+        return true;
+    }
+    else if (Char == ':')
+    {
+        return true;
+    }
+    else if (Char == '<')
+    {
+        return true;
+    }
+    else if (Char == '=')
+    {
+        return true;
+    }
+    else if (Char == '>')
+    {
+        return true;
+    }
+    else if (Char == '?')
+    {
+        return true;
+    }
+    else if (Char == '^')
+    {
+        return true;
+    }
+    else if (Char == '_')
+    {
+        return true;
+    }
+    else if (Char == '~')
+    {
+        return true;
+    }
+    else
+    {
         return false;
     }
 }
 
-bool UFigureLexer::IsIdStart(TCHAR Char)
+bool UFigureLexer::IsSubsequent(SSIZE_T Position)
 {
-    return IsInitial(Char) || Char == '|' || IsPeculiar(Char);
-}
-
-bool UFigureLexer::IsExplicitSign(TCHAR Char)
-{
-    switch (Char)
+    TCHAR Char = Source[Position];
+    if (Position >= Source.Len())
     {
-    case '+':
-    case '-':
+        return false;
+    }
+    else if (IsInitial(Position))
+    {
         return true;
-    default:
+    }
+    else if (TChar<TCHAR>::IsDigit(Char))
+    {
+        return true;
+    }
+    else if (IsSpecialSubsequent(Position))
+    {
+        return true;
+    }
+    else
+    {
         return false;
     }
 }
 
-bool UFigureLexer::IsPeculiar(TCHAR Char)
+bool UFigureLexer::IsSpecialSubsequent(SSIZE_T Position)
 {
-    return IsExplicitSign(Char) || Char == '.';
-}
-
-bool UFigureLexer::IsInitial(TCHAR Char)
-{
-    return TChar<TCHAR>::IsAlpha(Char) || IsSpecial(Char);
-}
-
-bool UFigureLexer::IsSubsequent(TCHAR Char)
-{
-    return IsInitial(Char) || TChar<TCHAR>::IsDigit(Char) || IsSpecialSubsequent(Char);
-}
-
-bool UFigureLexer::IsSpecialSubsequent(TCHAR Char)
-{
-    switch (Char)
+    TCHAR Char = Source[Position];
+    if (Position >= Source.Len())
     {
-    case '+':
-    case '-':
-    case '.':
-    case '@':
+        return false;
+    }
+    else if (IsExplicitSign(Position))
+    {
         return true;
-    default:
+    }
+    else if (Char == '.' || Char == '@')
+    {
+        return true;
+    }
+    else
+    {
         return false;
     }
 }
 
-bool UFigureLexer::IsSignSubsequent(TCHAR Char)
+bool UFigureLexer::IsVerticalLine(SSIZE_T Position)
 {
-    return IsInitial(Char) || IsExplicitSign(Char) || Char == '@';
+    return (Source[Position] == '|');
 }
 
-bool UFigureLexer::IsDotSubsequent(TCHAR Char)
+bool UFigureLexer::IsLineEnding(SSIZE_T Position)
 {
-    return IsSignSubsequent(Char) || Char == '.';
-}
-
-bool UFigureLexer::IsLineEnding(TCHAR Char)
-{
-    switch (Char)
+    TCHAR Char = Source[Position];
+    if (Position >= Source.Len())
     {
-    case '\n':
-    case '\r':
+        return false;
+    }
+    else if (Char == '\n' || Char == '\r')
+    {
         return true;
-    default:
+    }
+    else
+    {
         return false;
     }
 }
 
-bool UFigureLexer::IsNumber(TCHAR Char)
+bool UFigureLexer::IsComment(SSIZE_T Position)
 {
-    return TChar<TCHAR>::IsDigit(Char);
+    // TODO: Implement comments
+    return false;
+}
+
+bool UFigureLexer::IsNestedComment(SSIZE_T Position)
+{
+    return false;
+}
+
+bool UFigureLexer::IsCommentText(SSIZE_T Position)
+{
+    return false;
+}
+
+bool UFigureLexer::IsCommentCont(SSIZE_T Position)
+{
+    return false;
+}
+
+bool UFigureLexer::IsAtmosphere(SSIZE_T Position)
+{
+    TCHAR Char = Source[Position];
+    if (Position >= Source.Len())
+    {
+        return false;
+    }
+    else if (IsWhitespace(Position))
+    {
+        return true;
+    }
+    else if (IsComment(Position))
+    {
+        return true;
+    }
+    else
+    {
+        // TODO: Implement directives
+        return false;
+    }
+}
+
+bool UFigureLexer::IsIntertokenSpace(SSIZE_T Position)
+{
+    TCHAR Char = Source[Position];
+    if (Position >= Source.Len())
+    {
+        return false;
+    }
+    else if (IsAtmosphere(Position))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool UFigureLexer::IsSymbolElement(SSIZE_T Position)
+{
+    TCHAR Char = Source[Position];
+    if (Position >= Source.Len())
+    {
+        return false;
+    }
+    else if (IsVerticalLine(Position))
+    {
+        return false;
+    }
+    else if (Char == '\\')
+    {
+        return false;
+    }
+    else
+    {
+        // TODO: Implement inline hex escapes, mnenomic escapes, and '\|'
+        return true;
+    }
+}
+
+FFigureToken UFigureLexer::GetPeculiar(SSIZE_T Position)
+{
+    return FFigureToken();
+}
+
+bool UFigureLexer::IsPeculiarStart(SSIZE_T Position)
+{
+    // TODO: Implement +i, -i, and NaN
+    TCHAR Char = Source[Position];
+    if (Position >= Source.Len())
+    {
+        return false;
+    }
+    else if (IsExplicitSign(Position))
+    {
+        return true;
+    }
+    else if (Char == '.')
+    {
+        // TODO: Check for valid dot subsequents
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool UFigureLexer::IsExplicitSign(SSIZE_T Position)
+{
+    TCHAR Char = Source[Position];
+    if (Position >= Source.Len())
+    {
+        return false;
+    }
+    else if (Char == '+' || Char == '-')
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool UFigureLexer::IsSignSubsequent(SSIZE_T Position)
+{
+    TCHAR Char = Source[Position];
+    if (Position >= Source.Len())
+    {
+        return false;
+    }
+    else if (IsInitial(Position))
+    {
+        return true;
+    }
+    else if (IsExplicitSign(Position))
+    {
+        return true;
+    }
+    else if (Char == '@')
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool UFigureLexer::IsDotSubsequent(SSIZE_T Position)
+{
+    TCHAR Char = Source[Position];
+    if (Position >= Source.Len())
+    {
+        return false;
+    }
+    else if (IsSignSubsequent(Position))
+    {
+        return true;
+    }
+    else if (Char == '.')
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+FFigureToken UFigureLexer::GetBool(SSIZE_T& Position)
+{
+    return FFigureToken();
+}
+
+bool UFigureLexer::IsBoolStart(SSIZE_T Position)
+{
+    // TODO: Implement bool
+    return false;
+}
+
+FFigureToken UFigureLexer::GetNumber(SSIZE_T& Position)
+{
+    return FFigureToken();
+}
+
+bool UFigureLexer::IsNumberStart(SSIZE_T Position)
+{
+    // TODO: Implement numbers
+    return false;
+}
+
+FFigureToken UFigureLexer::GetCharacter(SSIZE_T& Position)
+{
+    return FFigureToken();
+}
+
+bool UFigureLexer::IsCharacterStart(SSIZE_T Position)
+{
+    // TODO: Implement characters
+    return false;
+}
+
+bool UFigureLexer::IsCharacterName(SSIZE_T Position)
+{
+    return false;
+}
+
+bool UFigureLexer::IsHexScalarValue(SSIZE_T Position)
+{
+    return false;
+}
+
+FFigureToken UFigureLexer::GetString(SSIZE_T& Position)
+{
+    return FFigureToken();
+}
+
+bool UFigureLexer::IsStringStart(SSIZE_T Position)
+{
+    TCHAR Char = Source[Position];
+    if (Position >= Source.Len())
+    {
+        return false;
+    }
+    else if (Char == '"')
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool UFigureLexer::IsStringElement(SSIZE_T Position)
+{
+    return false;
+}
+
+bool UFigureLexer::IsDelimiter(SSIZE_T Position)
+{
+    return false;
+}
+
+bool UFigureLexer::IsIntralineSpace(SSIZE_T Position)
+{
+    return false;
+}
+
+bool UFigureLexer::IsWhitespace(SSIZE_T Position)
+{
+    return false;
 }

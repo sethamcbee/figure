@@ -8,6 +8,7 @@ UENUM()
 enum class EFigureTokenType : uint8
 {
 	None,
+	Error,
 	Identifier,
 	Boolean,
 	Number,

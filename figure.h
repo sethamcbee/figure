@@ -6,6 +6,9 @@
 #include "UObject/NoExportTypes.h"
 #include "Figure.generated.h"
 
+class UFigureLexer;
+class UFigureDatum;
+
 /**
  * 
  */
@@ -20,4 +23,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void Read(const FString& Input);
+
+	UPROPERTY(EditAnywhere)
+	UFigureLexer* Lexer = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TArray<UFigureDatum*> Data;
 };

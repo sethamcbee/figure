@@ -28,6 +28,6 @@ struct FFigureToken
 	using ValueType = TVariant<FString, char, bool, float>;
 
 	EFigureTokenType Type = EFigureTokenType::None;
-	SIZE_T Position = 0;
+	SSIZE_T Position = 0;
 	ValueType Value;
 };

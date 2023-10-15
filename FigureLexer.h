@@ -54,6 +54,7 @@ private:
     FFigureToken GetString(SSIZE_T& Position);
     bool IsStringStart(SSIZE_T Position);
     bool IsStringElement(SSIZE_T Position);
+    bool IsMnemonicEscape(SSIZE_T Position);
     bool IsDelimiter(SSIZE_T Position);
     bool IsIntralineSpace(SSIZE_T Position);
     bool IsWhitespace(SSIZE_T Position);

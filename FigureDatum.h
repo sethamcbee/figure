@@ -6,18 +6,19 @@
 #include "UObject/NoExportTypes.h"
 #include "FigureDatum.generated.h"
 
+class UFigureDatum;
 class UFigureLexer;
 
 UFigureDatum* FigureReadDatum(UFigureLexer& Lexer, SSIZE_T& Position);
 
 /**
- * 
+ *
  */
 UCLASS()
 class PAPERTOWNS_API UFigureDatum : public UObject
 {
 	GENERATED_BODY()
-	
+
 public:
 
 	virtual bool IsSimpleDatum();
@@ -33,6 +34,6 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	UFigureLexer* SourceLexer = nullptr;
-	
+
 	SSIZE_T SourcePosition = 0;
 };

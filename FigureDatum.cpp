@@ -3,6 +3,7 @@
 
 #include "FigureDatum.h"
 
+#include "FigureConsCell.h"
 #include "FigureLexer.h"
 #include "FigureString.h"
 #include "FigureSymbol.h"
@@ -27,6 +28,9 @@ UFigureDatum* FigureReadDatum(UFigureLexer& Lexer, SSIZE_T& Position)
 	else if (Token.Type == EFigureTokenType::LeftParenthesis)
 	{
 		// Recursively get elements of list
+		auto List = NewObject<UFigureConsCell>(UFigureConsCell::StaticClass());
+		List->Read(Lexer, Position);
+		return List;
 	}
 	else
 	{
